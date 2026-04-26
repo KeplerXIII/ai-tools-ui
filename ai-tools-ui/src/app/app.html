@@ -1,0 +1,27 @@
+<mat-sidenav-container class="layout">
+  <mat-sidenav class="sidebar" mode="side" opened>
+    <mat-toolbar class="toolbar">
+      <span>AI Tools</span>
+    </mat-toolbar>
+
+    <mat-nav-list>
+      <a mat-list-item routerLink="/translate" routerLinkActive="active">
+        Переводчик
+      </a>
+
+      <a mat-list-item routerLink="/article-parser" routerLinkActive="active">
+        Парсер статьи
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <mat-toolbar class="toolbar">
+      Панель инструментов
+    </mat-toolbar>
+
+    <main class="page">
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

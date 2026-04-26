@@ -1,0 +1,88 @@
+<mat-card class="tool-card">
+  <mat-card-header>
+    <mat-card-title>Переводчик</mat-card-title>
+    <mat-card-subtitle>
+      Автоопределение входного языка, перевод на русский язык
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="translate-grid">
+      <section class="panel">
+        <div class="panel-title">
+          Исходный текст
+          <span class="lang-badge">auto</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea
+            matInput
+            rows="14"
+            [(ngModel)]="text"
+            placeholder="Вставьте текст для перевода"
+          ></textarea>
+        </mat-form-field>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          Результат
+          <span class="lang-badge">{{ targetLang || 'ru' }}</span>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea
+            matInput
+            rows="14"
+            [value]="result"
+            readonly
+            placeholder="Здесь появится перевод"
+          ></textarea>
+        </mat-form-field>
+      </section>
+    </div>
+
+    <div class="meta-row">
+      <span>Определённый язык: {{ sourceLang || '—' }}</span>
+      <span>Целевой язык: {{ targetLang || 'ru' }}</span>
+    </div>
+
+    <div class="actions">
+      <button
+        matButton="filled"
+        (click)="translate()"
+        [disabled]="loading || !text.trim()"
+      >
+        Перевести
+      </button>
+
+      <button
+        matButton="outlined"
+        type="button"
+        (click)="clear()"
+        [disabled]="loading"
+      >
+        Очистить
+      </button>
+
+      <button
+        matButton="outlined"
+        type="button"
+        (click)="copyResult()"
+        [disabled]="!result"
+      >
+        {{ copied ? 'Скопировано' : 'Копировать результат' }}
+      </button>
+
+      @if (loading) {
+        <mat-spinner diameter="28"></mat-spinner>
+      }
+    </div>
+
+    @if (error) {
+      <div class="error">
+        {{ error }}
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

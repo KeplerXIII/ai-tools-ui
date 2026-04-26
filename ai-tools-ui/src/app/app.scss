@@ -1,0 +1,49 @@
+mat-sidenav {
+  border-radius: 0 !important;
+  overflow: hidden; // важно
+}
+
+mat-nav-list {
+  padding: 8px;
+}
+
+mat-nav-list a {
+  border-radius: 12px;
+  margin: 4px 0;
+}
+
+.sidebar {
+  width: 260px;
+  border-right: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.brand {
+  padding: 24px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.toolbar {
+  background: #1e293b;
+  color: white;
+  border-bottom: 1px solid #0f172a;
+  font-weight: 600;
+  padding: 0 28px;
+  min-height: 72px;
+}
+
+.content {
+  background: #f1f5f9;
+}
+
+.page {
+  padding: 28px;
+}
+
+.active {
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-weight: 600;
+}

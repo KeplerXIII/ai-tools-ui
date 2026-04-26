@@ -1,0 +1,64 @@
+.tool-card {
+  max-width: 1400px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.translate-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0 8px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.lang-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.meta-row {
+  display: flex;
+  gap: 24px;
+  margin-top: 4px;
+  color: #666;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.error {
+  margin-top: 12px;
+  color: #c62828;
+}
+
+@media (max-width: 900px) {
+  .translate-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .meta-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

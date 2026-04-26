@@ -1,0 +1,163 @@
+<mat-card class="tool-card">
+  <mat-card-header>
+    <mat-card-title>Парсер статьи</mat-card-title>
+    <mat-card-subtitle>
+      Извлечение текста статьи, сущностей, перевода и аннотации
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="url-row">
+      <mat-form-field appearance="outline" class="url-field">
+        <mat-label>Ссылка на статью</mat-label>
+        <input
+          matInput
+          [(ngModel)]="url"
+          placeholder="https://example.com/article"
+        />
+      </mat-form-field>
+
+      <button
+        matButton="filled"
+        (click)="extractArticle()"
+        [disabled]="loadingArticle || !url.trim()"
+      >
+        Получить статью
+      </button>
+
+      <button
+        matButton="outlined"
+        type="button"
+        (click)="clear()"
+        [disabled]="loadingArticle"
+      >
+        Очистить
+      </button>
+
+      @if (loadingArticle) {
+        <mat-spinner diameter="28"></mat-spinner>
+      }
+    </div>
+
+    @if (error) {
+      <div class="error">{{ error }}</div>
+    }
+
+    @if (article) {
+      <div class="article-grid">
+        <section class="panel">
+          <div class="panel-title">Метаданные</div>
+
+          <div class="meta-list">
+            <div><b>Заголовок:</b> {{ article.title || '—' }}</div>
+            <div><b>Автор:</b> {{ article.author || '—' }}</div>
+            <div><b>Дата:</b> {{ article.date || '—' }}</div>
+            <div><b>URL:</b> {{ article.url || '—' }}</div>
+            <div><b>Длина:</b> {{ article.length }}</div>
+            <div><b>Качество:</b> {{ article.quality }}</div>
+            <div><b>Требует проверки:</b> {{ article.needs_review ? 'да' : 'нет' }}</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            Сущности
+            <button
+              matButton="outlined"
+              type="button"
+              (click)="requestEntities()"
+              [disabled]="loadingEntities"
+            >
+              Запросить сущности
+            </button>
+          </div>
+
+          @if (loadingEntities) {
+            <mat-spinner diameter="28"></mat-spinner>
+          }
+
+          <div class="entity-block">
+            <b>Упоминания образцов ВВТ</b>
+            <textarea readonly [value]="entities?.military_equipment?.join('\n') || ''"></textarea>
+          </div>
+
+          <div class="entity-block">
+            <b>Производители</b>
+            <textarea readonly [value]="entities?.manufacturers?.join('\n') || ''"></textarea>
+          </div>
+
+          <div class="entity-block">
+            <b>Контракты</b>
+            <textarea readonly [value]="entities?.contracts?.join('\n') || ''"></textarea>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel full">
+        <div class="panel-title">Исходный текст</div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea matInput rows="12" [value]="article.text" readonly></textarea>
+        </mat-form-field>
+      </section>
+
+      <section class="panel full">
+        <div class="panel-title">
+          Текст на русском языке
+
+          <button
+            matButton="outlined"
+            type="button"
+            (click)="translateArticle()"
+            [disabled]="loadingTranslation"
+          >
+            Перевести на русский
+          </button>
+        </div>
+
+        @if (loadingTranslation) {
+          <mat-spinner diameter="28"></mat-spinner>
+        }
+
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea
+            matInput
+            rows="12"
+            [value]="translatedText"
+            readonly
+            placeholder="Здесь появится перевод"
+          ></textarea>
+        </mat-form-field>
+      </section>
+
+      <section class="panel full">
+        <div class="panel-title">
+          Аннотация
+
+          <button
+            matButton="outlined"
+            type="button"
+            (click)="summarizeArticle()"
+            [disabled]="loadingSummary || !translatedText.trim()"
+          >
+            Сформировать аннотацию
+          </button>
+        </div>
+
+        @if (loadingSummary) {
+          <mat-spinner diameter="28"></mat-spinner>
+        }
+
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea
+            matInput
+            rows="6"
+            [value]="annotation"
+            readonly
+            placeholder="Аннотация доступна после перевода"
+          ></textarea>
+        </mat-form-field>
+      </section>
+    }
+  </mat-card-content>
+</mat-card>
