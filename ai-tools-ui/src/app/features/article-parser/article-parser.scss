@@ -93,30 +93,67 @@
   border: 1px solid transparent;
 }
 
-/* оригинал — нейтральный */
+/* оригинал */
 .tags.original .tag {
   background: #f1f5f9;
   color: #334155;
   border-color: #e2e8f0;
 }
 
-/* перевод — зелёный */
+/* перевод */
 .tags.translated .tag {
   background: #dcfce7;
   color: #166534;
   border-color: #bbf7d0;
 }
 
-@media (max-width: 1000px) {
-  .url-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
+/* =========================
+   ТЕКСТ С ПОДСВЕТКОЙ
+========================= */
 
-  .article-grid {
-    grid-template-columns: 1fr;
-  }
+.article-text-preview {
+  min-height: 260px;
+  max-height: 520px;
+  overflow: auto;
+  line-height: 1.6;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 14px;
 }
+
+/* ВВТ — красный */
+:host ::ng-deep .entity-equipment {
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-weight: 600;
+}
+
+/* производители — зелёный */
+:host ::ng-deep .entity-manufacturer {
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-weight: 600;
+}
+
+/* контракты — синий */
+:host ::ng-deep .entity-contract {
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-weight: 600;
+}
+
+/* =========================
+   КАРТИНКИ
+========================= */
 
 .main-image-block {
   margin-top: 12px;
@@ -140,15 +177,17 @@
   transform: scale(1.02);
 }
 
+/* overlay */
+
 .image-overlay {
   position: fixed;
   top: 0;
-  left: 72px;
-  right: 72px;
+  left: 72px; /* отступ под сайдбар */
   width: calc(100vw - 72px);
   height: 100vh;
 
   background: rgba(0, 0, 0, 0.88);
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,6 +204,26 @@
   border-radius: 12px;
 }
 
-.main-image.clickable {
-  cursor: zoom-in;
+/* =========================
+   АДАПТИВ
+========================= */
+
+@media (max-width: 1000px) {
+  .url-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .article-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .image-overlay {
+    left: 0;
+    width: 100vw;
+  }
+
+  .image-full {
+    max-width: 100%;
+  }
 }

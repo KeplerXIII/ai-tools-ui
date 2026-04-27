@@ -251,14 +251,20 @@
           <mat-spinner diameter="24"></mat-spinner>
         }
 
-        <mat-form-field appearance="outline" class="full-width">
-          <textarea
-            matInput
-            rows="12"
-            [(ngModel)]="state.article.text"
-            [readonly]="!state.editMode"
-          ></textarea>
-        </mat-form-field>
+        @if (!state.editMode) {
+          <div
+            class="article-text-preview"
+            [innerHTML]="getHighlightedArticleText()"
+          ></div>
+        } @else {
+          <mat-form-field appearance="outline" class="full-width">
+            <textarea
+              matInput
+              rows="12"
+              [(ngModel)]="state.article.text"
+            ></textarea>
+          </mat-form-field>
+        }
 
         @if (state.originalTags.length) {
           <div class="tags original">

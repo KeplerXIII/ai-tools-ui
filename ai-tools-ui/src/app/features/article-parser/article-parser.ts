@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -33,18 +34,19 @@ export class ArticleParser {
 
   imagePreview: string | null = null;
 
-  openImage(url: string) {
+  constructor(
+    private api: ArticleParserApi,
+    public state: ArticleParserState,
+    private sanitizer: DomSanitizer
+  ) {}
+
+  openImage(url: string): void {
     this.imagePreview = url;
   }
 
-  closeImage() {
+  closeImage(): void {
     this.imagePreview = null;
   }
-
-  constructor(
-    private api: ArticleParserApi,
-    public state: ArticleParserState
-  ) {}
 
   // =========================
   // ОСНОВНОЕ
@@ -141,6 +143,7 @@ export class ArticleParser {
 
   clear(): void {
     this.state.clear();
+    this.imagePreview = null;
   }
 
   // =========================
@@ -183,6 +186,67 @@ export class ArticleParser {
         this.loadingTranslatedTags = false;
       },
     });
+  }
+
+  // =========================
+  // ПОДСВЕТКА СУЩНОСТЕЙ
+  // =========================
+
+  getHighlightedArticleText(): SafeHtml {
+    const text = this.state.article?.text || '';
+
+    if (!this.state.entities) {
+      return this.sanitizer.bypassSecurityTrustHtml(
+        this.escapeHtml(text).replace(/\n/g, '<br>')
+      );
+    }
+
+    let html = this.escapeHtml(text);
+
+    const replacements: { value: string; className: string }[] = [
+      ...this.state.entities.military_equipment.map((x) => ({
+        value: x,
+        className: 'entity-equipment',
+      })),
+      ...this.state.entities.manufacturers.map((x) => ({
+        value: x,
+        className: 'entity-manufacturer',
+      })),
+      ...this.state.entities.contracts.map((x) => ({
+        value: x,
+        className: 'entity-contract',
+      })),
+    ];
+
+    replacements
+      .filter((x) => x.value && x.value.trim())
+      .sort((a, b) => b.value.length - a.value.length)
+      .forEach((item) => {
+        const escapedValue = this.escapeRegExp(this.escapeHtml(item.value.trim()));
+        const regex = new RegExp(escapedValue, 'gi');
+
+        html = html.replace(
+          regex,
+          (match) => `<span class="${item.className}">${match}</span>`
+        );
+      });
+
+    html = html.replace(/\n/g, '<br>');
+
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  private escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   // =========================

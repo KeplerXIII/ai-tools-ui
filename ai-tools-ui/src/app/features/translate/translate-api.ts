@@ -11,8 +11,6 @@ export interface TranslateResponse {
   providedIn: 'root',
 })
 export class TranslateApi {
-  //private readonly apiUrl = 'http://100.70.234.112:8010/api/v1/translate';
-  // Для Docker/nginx 
   private readonly apiUrl = '/api/v1/translate';
 
   constructor(private http: HttpClient) {}
