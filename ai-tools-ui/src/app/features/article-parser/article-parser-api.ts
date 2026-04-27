@@ -1,6 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
+export interface ImageInfo {
+  url: string;
+  alt: string | null;
+  title: string | null;
+}
+
 export interface ExtractResponse {
   title: string | null;
   author: string | null;
@@ -11,6 +17,8 @@ export interface ExtractResponse {
   method: string;
   quality: string;
   needs_review: boolean;
+  images: ImageInfo[];
+  main_image: string | null;
 }
 
 export interface EntitiesResponse {
@@ -57,6 +65,13 @@ export class ArticleParserApi {
   summarize(text: string) {
     return this.http.post<SummaryResponse>('/api/v1/extract/summary', {
       text,
+    });
+  }
+
+  tagText(text: string, maxTags = 12) {
+    return this.http.post<{ tags: string[] }>('/api/v1/extract/tags', {
+      text,
+      max_tags: maxTags,
     });
   }
 }

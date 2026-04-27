@@ -2,7 +2,7 @@
   <mat-card-header>
     <mat-card-title>Парсер статьи</mat-card-title>
     <mat-card-subtitle>
-      Извлечение текста статьи, сущностей, перевода и аннотации
+      Извлечение текста статьи, сущностей, перевода, тегов и аннотации
     </mat-card-subtitle>
   </mat-card-header>
 
@@ -12,7 +12,7 @@
         <mat-label>Ссылка на статью</mat-label>
         <input
           matInput
-          [(ngModel)]="url"
+          [(ngModel)]="state.url"
           placeholder="https://example.com/article"
         />
       </mat-form-field>
@@ -20,7 +20,7 @@
       <button
         matButton="filled"
         (click)="extractArticle()"
-        [disabled]="loadingArticle || !url.trim()"
+        [disabled]="loadingArticle || !state.url.trim()"
       >
         Получить статью
       </button>
@@ -34,34 +34,162 @@
         Очистить
       </button>
 
+      @if (state.article) {
+        <button
+          matButton="outlined"
+          type="button"
+          (click)="toggleEditMode()"
+        >
+          {{ state.editMode ? 'Завершить редактирование' : 'Редактировать' }}
+        </button>
+
+        <button matButton="outlined" type="button" disabled>
+          Отправить в MAX
+        </button>
+
+        <button matButton="outlined" type="button" disabled>
+          Добавить в БД
+        </button>
+      }
+
       @if (loadingArticle) {
         <mat-spinner diameter="28"></mat-spinner>
       }
     </div>
 
-    @if (error) {
-      <div class="error">{{ error }}</div>
+    @if (state.error) {
+      <div class="error">{{ state.error }}</div>
     }
 
-    @if (article) {
+    @if (state.article) {
       <div class="article-grid">
         <section class="panel">
           <div class="panel-title">Метаданные</div>
 
-          <div class="meta-list">
-            <div><b>Заголовок:</b> {{ article.title || '—' }}</div>
-            <div><b>Автор:</b> {{ article.author || '—' }}</div>
-            <div><b>Дата:</b> {{ article.date || '—' }}</div>
-            <div><b>URL:</b> {{ article.url || '—' }}</div>
-            <div><b>Длина:</b> {{ article.length }}</div>
-            <div><b>Качество:</b> {{ article.quality }}</div>
-            <div><b>Требует проверки:</b> {{ article.needs_review ? 'да' : 'нет' }}</div>
-          </div>
+          @if (!state.editMode) {
+            <div class="meta-list">
+              <div><b>Заголовок:</b> {{ state.article.title || '—' }}</div>
+              <div><b>Автор:</b> {{ state.article.author || '—' }}</div>
+              <div><b>Дата:</b> {{ state.article.date || '—' }}</div>
+              <div><b>URL:</b> {{ state.article.url || '—' }}</div>
+              <div><b>Длина:</b> {{ state.article.length }}</div>
+              <div><b>Качество:</b> {{ state.article.quality }}</div>
+              <div>
+                <b>Требует проверки:</b>
+                {{ state.article.needs_review ? 'да' : 'нет' }}
+              </div>
+              @if (state.article.main_image) {
+                <div class="main-image-block">
+                  <b>Главное изображение:</b>
+
+                  <img
+                    class="main-image clickable"
+                    [src]="state.article.main_image"
+                    alt="Главное изображение статьи"
+                    (click)="openImage(state.article.main_image!)"
+                  />
+                </div>
+              }
+              @if (state.originalTags.length) {
+                <div class="meta-tags">
+                  <b>Теги (оригинал):</b>
+                  <div class="tags original">
+                    @for (tag of state.originalTags; track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              @if (state.translatedTags.length) {
+                <div class="meta-tags">
+                  <b>Теги (русский):</b>
+                  <div class="tags translated">
+                    @for (tag of state.translatedTags; track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="meta-edit">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Заголовок</mat-label>
+                <input matInput [(ngModel)]="state.article.title" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Автор</mat-label>
+                <input matInput [(ngModel)]="state.article.author" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Дата</mat-label>
+                <input matInput [(ngModel)]="state.article.date" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>URL</mat-label>
+                <input matInput [(ngModel)]="state.article.url" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Главное изображение</mat-label>
+                <input
+                  matInput
+                  [(ngModel)]="state.article.main_image"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </mat-form-field>
+
+              @if (state.article.main_image) {
+                <div class="main-image-block">
+                  <b>Предпросмотр изображения:</b>
+
+                  <img
+                    class="main-image"
+                    [src]="state.article.main_image"
+                    alt="Главное изображение статьи"
+                  />
+                </div>
+              }
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Теги оригинала</mat-label>
+                <textarea
+                  matInput
+                  rows="4"
+                  [(ngModel)]="state.originalTagsText"
+                  placeholder="Каждый тег с новой строки"
+                ></textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Теги на русском</mat-label>
+                <textarea
+                  matInput
+                  rows="4"
+                  [(ngModel)]="state.translatedTagsText"
+                  placeholder="Каждый тег с новой строки"
+                ></textarea>
+              </mat-form-field>
+
+              <button
+                matButton="filled"
+                type="button"
+                (click)="applyEditedTags()"
+              >
+                Применить теги
+              </button>
+            </div>
+          }
         </section>
 
         <section class="panel">
           <div class="panel-title">
             Сущности
+
             <button
               matButton="outlined"
               type="button"
@@ -78,56 +206,111 @@
 
           <div class="entity-block">
             <b>Упоминания образцов ВВТ</b>
-            <textarea readonly [value]="entities?.military_equipment?.join('\n') || ''"></textarea>
+            <textarea
+              [readonly]="!state.editMode"
+              [ngModel]="state.entities?.military_equipment?.join('\n') || ''"
+              (ngModelChange)="updateEntityList('military_equipment', $event)"
+            ></textarea>
           </div>
 
           <div class="entity-block">
             <b>Производители</b>
-            <textarea readonly [value]="entities?.manufacturers?.join('\n') || ''"></textarea>
+            <textarea
+              [readonly]="!state.editMode"
+              [ngModel]="state.entities?.manufacturers?.join('\n') || ''"
+              (ngModelChange)="updateEntityList('manufacturers', $event)"
+            ></textarea>
           </div>
 
           <div class="entity-block">
             <b>Контракты</b>
-            <textarea readonly [value]="entities?.contracts?.join('\n') || ''"></textarea>
+            <textarea
+              [readonly]="!state.editMode"
+              [ngModel]="state.entities?.contracts?.join('\n') || ''"
+              (ngModelChange)="updateEntityList('contracts', $event)"
+            ></textarea>
           </div>
         </section>
       </div>
 
       <section class="panel full">
-        <div class="panel-title">Исходный текст</div>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <textarea matInput rows="12" [value]="article.text" readonly></textarea>
-        </mat-form-field>
-      </section>
-
-      <section class="panel full">
         <div class="panel-title">
-          Текст на русском языке
+          Исходный текст
 
           <button
             matButton="outlined"
             type="button"
-            (click)="translateArticle()"
-            [disabled]="loadingTranslation"
+            (click)="tagOriginal()"
+            [disabled]="loadingOriginalTags"
           >
-            Перевести на русский
+            Тегировать оригинал
           </button>
         </div>
 
-        @if (loadingTranslation) {
-          <mat-spinner diameter="28"></mat-spinner>
+        @if (loadingOriginalTags) {
+          <mat-spinner diameter="24"></mat-spinner>
         }
 
         <mat-form-field appearance="outline" class="full-width">
           <textarea
             matInput
             rows="12"
-            [value]="translatedText"
-            readonly
+            [(ngModel)]="state.article.text"
+            [readonly]="!state.editMode"
+          ></textarea>
+        </mat-form-field>
+
+        @if (state.originalTags.length) {
+          <div class="tags original">
+            <span class="tag" *ngFor="let t of state.originalTags">{{ t }}</span>
+          </div>
+        }
+      </section>
+
+      <section class="panel full">
+        <div class="panel-title">
+          Текст на русском языке
+
+          <div class="title-actions">
+            <button
+              matButton="outlined"
+              type="button"
+              (click)="translateArticle()"
+              [disabled]="loadingTranslation"
+            >
+              Перевести на русский
+            </button>
+
+            <button
+              matButton="outlined"
+              type="button"
+              (click)="tagTranslated()"
+              [disabled]="!state.translatedText.trim() || loadingTranslatedTags"
+            >
+              Тегировать перевод
+            </button>
+          </div>
+        </div>
+
+        @if (loadingTranslation || loadingTranslatedTags) {
+          <mat-spinner diameter="24"></mat-spinner>
+        }
+
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea
+            matInput
+            rows="12"
+            [(ngModel)]="state.translatedText"
+            [readonly]="!state.editMode"
             placeholder="Здесь появится перевод"
           ></textarea>
         </mat-form-field>
+
+        @if (state.translatedTags.length) {
+          <div class="tags translated">
+            <span class="tag" *ngFor="let t of state.translatedTags">{{ t }}</span>
+          </div>
+        }
       </section>
 
       <section class="panel full">
@@ -138,7 +321,7 @@
             matButton="outlined"
             type="button"
             (click)="summarizeArticle()"
-            [disabled]="loadingSummary || !translatedText.trim()"
+            [disabled]="loadingSummary || !state.translatedText.trim()"
           >
             Сформировать аннотацию
           </button>
@@ -152,12 +335,21 @@
           <textarea
             matInput
             rows="6"
-            [value]="annotation"
-            readonly
+            [(ngModel)]="state.annotation"
+            [readonly]="!state.editMode"
             placeholder="Аннотация доступна после перевода"
           ></textarea>
         </mat-form-field>
       </section>
+    }
+    @if (imagePreview) {
+      <div class="image-overlay" (click)="closeImage()">
+        <img
+          class="image-full"
+          [src]="imagePreview"
+          (click)="$event.stopPropagation()"
+        />
+      </div>
     }
   </mat-card-content>
 </mat-card>
