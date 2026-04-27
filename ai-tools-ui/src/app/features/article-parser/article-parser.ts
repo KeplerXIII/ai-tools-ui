@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
@@ -37,7 +37,8 @@ export class ArticleParser {
   constructor(
     private api: ArticleParserApi,
     public state: ArticleParserState,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
   ) {}
 
   openImage(url: string): void {
@@ -100,7 +101,7 @@ export class ArticleParser {
     });
   }
 
-  translateArticle(): void {
+  async translateArticle(): Promise<void> {
     if (!this.state.article?.text) return;
 
     this.loadingTranslation = true;
@@ -110,16 +111,23 @@ export class ArticleParser {
     this.state.translatedTags = [];
     this.state.translatedTagsText = '';
 
-    this.api.translateToRussian(this.state.article.text).subscribe({
-      next: (response) => {
-        this.state.translatedText = response.translation;
-        this.loadingTranslation = false;
-      },
-      error: () => {
-        this.state.error = 'Ошибка при переводе статьи';
-        this.loadingTranslation = false;
-      },
-    });
+    try {
+      const response = await this.api.translateToRussianStream(
+        this.state.article.text,
+        (chunk) => {
+          this.state.translatedText += chunk;
+          this.cdr.detectChanges();
+        }
+      );
+
+      this.state.translatedText = response.translation;
+    } catch (error) {
+      console.error(error);
+      this.state.error = 'Ошибка при переводе статьи';
+    } finally {
+      this.loadingTranslation = false;
+      this.cdr.detectChanges();
+    }
   }
 
   summarizeArticle(): void {
