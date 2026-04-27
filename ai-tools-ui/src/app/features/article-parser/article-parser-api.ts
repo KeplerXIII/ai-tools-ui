@@ -125,6 +125,44 @@ export class ArticleParserApi {
     });
   }
 
+  async summarizeStream(
+    text: string,
+    onChunk: (chunk: string) => void
+  ): Promise<string> {
+    const response = await fetch('/api/v1/extract/summary/stream', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ошибка аннотации: ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error('Пустой streaming response body');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    let result = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+
+      result += chunk;
+      onChunk(chunk);
+    }
+
+    return result;
+  }
+
   tagText(text: string, maxTags = 12) {
     return this.http.post<{ tags: string[] }>('/api/v1/extract/tags', {
       text,

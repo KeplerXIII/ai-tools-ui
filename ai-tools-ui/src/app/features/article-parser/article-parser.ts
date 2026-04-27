@@ -34,6 +34,8 @@ export class ArticleParser {
 
   imagePreview: string | null = null;
 
+  private buffer = '';
+
   constructor(
     private api: ArticleParserApi,
     public state: ArticleParserState,
@@ -130,23 +132,36 @@ export class ArticleParser {
     }
   }
 
-  summarizeArticle(): void {
+  async summarizeArticle(): Promise<void> {
     if (!this.state.translatedText.trim()) return;
 
     this.loadingSummary = true;
     this.state.error = '';
     this.state.annotation = '';
+    this.buffer = '';
 
-    this.api.summarize(this.state.translatedText).subscribe({
-      next: (response) => {
-        this.state.annotation = response.annotation;
-        this.loadingSummary = false;
-      },
-      error: () => {
-        this.state.error = 'Ошибка при формировании аннотации';
-        this.loadingSummary = false;
-      },
-    });
+    try {
+      const result = await this.api.summarizeStream(
+        this.state.translatedText,
+        (chunk) => {
+          this.buffer += chunk;
+
+          requestAnimationFrame(() => {
+            this.state.annotation += this.buffer;
+            this.buffer = '';
+            this.cdr.detectChanges();
+          });
+        }
+      );
+
+      this.state.annotation = result;
+    } catch (error) {
+      console.error(error);
+      this.state.error = 'Ошибка при формировании аннотации';
+    } finally {
+      this.loadingSummary = false;
+      this.cdr.detectChanges();
+    }
   }
 
   clear(): void {
