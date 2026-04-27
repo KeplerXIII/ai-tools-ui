@@ -50,10 +50,11 @@
     <div class="actions">
       <button
         matButton="filled"
+        type="button"
         (click)="translate()"
         [disabled]="loading || !text.trim()"
       >
-        Перевести
+        {{ loading ? 'Переводится...' : 'Перевести' }}
       </button>
 
       <button
