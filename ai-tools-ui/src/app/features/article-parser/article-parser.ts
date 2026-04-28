@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +10,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { ArticleParserApi } from './article-parser-api';
 import { ArticleParserState } from './article-parser-state';
+import { PrimaryButtonComponent } from '../../shared/ui/primary-button/primary-button.component';
+import { ButtonVariant, OutlineButtonComponent } from '../../shared/ui/outline-button/outline-button.component';
+import { ArticleParserUrlFormComponent } from './article-parser-url-form/article-parser-url-form';
 
 @Component({
   selector: 'app-article-parser',
@@ -19,11 +23,17 @@ import { ArticleParserState } from './article-parser-state';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    FloatLabelModule,
+    InputTextModule,
+    PrimaryButtonComponent,
+    OutlineButtonComponent,
+    ArticleParserUrlFormComponent,
   ],
   templateUrl: './article-parser.html',
   styleUrl: './article-parser.scss',
 })
 export class ArticleParser {
+  readonly ButtonVariant = ButtonVariant;
   loadingArticle = false;
   loadingEntities = false;
   loadingTranslation = false;
@@ -43,7 +53,7 @@ export class ArticleParser {
 
   constructor(
     private api: ArticleParserApi,
-    public state: ArticleParserState
+    public state: ArticleParserState,
   ) {}
 
   // =========================
@@ -223,7 +233,7 @@ export class ArticleParser {
 
   updateEntityList(
     field: 'military_equipment' | 'manufacturers' | 'contracts',
-    value: string
+    value: string,
   ): void {
     if (!this.state.entities) {
       this.state.entities = {

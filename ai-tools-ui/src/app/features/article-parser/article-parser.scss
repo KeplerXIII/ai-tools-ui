@@ -1,17 +1,32 @@
 .tool-card {
   max-width: 1400px;
-  border-radius: 16px;
+  font-family: var(--font-family-base);
 }
-
-.url-row {
+.url-form-wrapper {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
 }
 
-.url-field {
-  flex: 1;
+.btn-wrapper {
+  display: flex;
+  gap: 10px;
+  padding-top: 20px;
+}
+
+.parser_header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.parser_title {
+  margin: 0;
+  color: var(--primary-text-color);
+}
+
+.parser_subtitle {
+  font-weight: var(--font-weight-light);
+  color: var(--grey-text-color);
 }
 
 .article-grid {
@@ -108,11 +123,6 @@
 }
 
 @media (max-width: 1000px) {
-  .url-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .article-grid {
     grid-template-columns: 1fr;
   }

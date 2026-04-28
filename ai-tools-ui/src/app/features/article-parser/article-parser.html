@@ -1,355 +1,320 @@
-<mat-card class="tool-card">
-  <mat-card-header>
-    <mat-card-title>Парсер статьи</mat-card-title>
-    <mat-card-subtitle>
-      Извлечение текста статьи, сущностей, перевода, тегов и аннотации
-    </mat-card-subtitle>
-  </mat-card-header>
+<div class="tool-card">
+  <div class="parser_header">
+    <h1 class="parser_title">Парсер статьи</h1>
+    <p class="parser_subtitle">Извлечение текста статьи, сущностей, перевода, тегов и аннотации.</p>
+  </div>
 
-  <mat-card-content>
-    <div class="url-row">
-      <mat-form-field appearance="outline" class="url-field">
-        <mat-label>Ссылка на статью</mat-label>
-        <input
-          matInput
-          [(ngModel)]="state.url"
-          placeholder="https://example.com/article"
-        />
-      </mat-form-field>
+  <app-article-parser-url-form
+    [(url)]="state.url"
+    [loading]="loadingArticle"
+    (submitUrl)="extractArticle()"
+    (clearClicked)="clear()"
+  />
 
-      <button
-        matButton="filled"
-        (click)="extractArticle()"
-        [disabled]="loadingArticle || !state.url.trim()"
-      >
-        Получить статью
-      </button>
+  @if (!state.article) {
+    <div class="btn-wrapper">
+      <app-outline-button
+        [text]="state.editMode ? 'Завершить редактирование' : 'Редактировать'"
+        iconName="pi pi-pen-to-square"
+        size="large"
+        [variant]="ButtonVariant.Rounded"
+        (clicked)="toggleEditMode()"
+      />
 
-      <button
-        matButton="outlined"
-        type="button"
-        (click)="clear()"
-        [disabled]="loadingArticle"
-      >
-        Очистить
-      </button>
+      <button matButton="outlined" type="button" disabled>Отправить в MAX</button>
 
-      @if (state.article) {
-        <button
-          matButton="outlined"
-          type="button"
-          (click)="toggleEditMode()"
-        >
-          {{ state.editMode ? 'Завершить редактирование' : 'Редактировать' }}
-        </button>
-
-        <button matButton="outlined" type="button" disabled>
-          Отправить в MAX
-        </button>
-
-        <button matButton="outlined" type="button" disabled>
-          Добавить в БД
-        </button>
-      }
-
-      @if (loadingArticle) {
-        <mat-spinner diameter="28"></mat-spinner>
-      }
+      <button matButton="outlined" type="button" disabled>Добавить в БД</button>
     </div>
+  }
 
-    @if (state.error) {
-      <div class="error">{{ state.error }}</div>
-    }
+  @if (loadingArticle) {
+    <mat-spinner diameter="28"></mat-spinner>
+  }
 
-    @if (state.article) {
-      <div class="article-grid">
-        <section class="panel">
-          <div class="panel-title">Метаданные</div>
+  @if (state.error) {
+    <div class="error">{{ state.error }}</div>
+  }
 
-          @if (!state.editMode) {
-            <div class="meta-list">
-              <div><b>Заголовок:</b> {{ state.article.title || '—' }}</div>
-              <div><b>Автор:</b> {{ state.article.author || '—' }}</div>
-              <div><b>Дата:</b> {{ state.article.date || '—' }}</div>
-              <div><b>URL:</b> {{ state.article.url || '—' }}</div>
-              <div><b>Длина:</b> {{ state.article.length }}</div>
-              <div><b>Качество:</b> {{ state.article.quality }}</div>
-              <div>
-                <b>Требует проверки:</b>
-                {{ state.article.needs_review ? 'да' : 'нет' }}
-              </div>
-              @if (state.article.main_image) {
-                <div class="main-image-block">
-                  <b>Главное изображение:</b>
+  @if (state.article) {
+    <div class="article-grid">
+      <section class="panel">
+        <div class="panel-title">Метаданные</div>
 
-                  <img
-                    class="main-image clickable"
-                    [src]="state.article.main_image"
-                    alt="Главное изображение статьи"
-                    (click)="openImage(state.article.main_image!)"
-                  />
-                </div>
-              }
-              @if (state.originalTags.length) {
-                <div class="meta-tags">
-                  <b>Теги (оригинал):</b>
-                  <div class="tags original">
-                    @for (tag of state.originalTags; track tag) {
-                      <span class="tag">{{ tag }}</span>
-                    }
-                  </div>
-                </div>
-              }
-
-              @if (state.translatedTags.length) {
-                <div class="meta-tags">
-                  <b>Теги (русский):</b>
-                  <div class="tags translated">
-                    @for (tag of state.translatedTags; track tag) {
-                      <span class="tag">{{ tag }}</span>
-                    }
-                  </div>
-                </div>
-              }
+        @if (!state.editMode) {
+          <div class="meta-list">
+            <div><b>Заголовок:</b> {{ state.article.title || '—' }}</div>
+            <div><b>Автор:</b> {{ state.article.author || '—' }}</div>
+            <div><b>Дата:</b> {{ state.article.date || '—' }}</div>
+            <div><b>URL:</b> {{ state.article.url || '—' }}</div>
+            <div><b>Длина:</b> {{ state.article.length }}</div>
+            <div><b>Качество:</b> {{ state.article.quality }}</div>
+            <div>
+              <b>Требует проверки:</b>
+              {{ state.article.needs_review ? 'да' : 'нет' }}
             </div>
-          } @else {
-            <div class="meta-edit">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Заголовок</mat-label>
-                <input matInput [(ngModel)]="state.article.title" />
-              </mat-form-field>
+            @if (state.article.main_image) {
+              <div class="main-image-block">
+                <b>Главное изображение:</b>
 
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Автор</mat-label>
-                <input matInput [(ngModel)]="state.article.author" />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Дата</mat-label>
-                <input matInput [(ngModel)]="state.article.date" />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>URL</mat-label>
-                <input matInput [(ngModel)]="state.article.url" />
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Главное изображение</mat-label>
-                <input
-                  matInput
-                  [(ngModel)]="state.article.main_image"
-                  placeholder="https://example.com/image.jpg"
+                <img
+                  class="main-image clickable"
+                  [src]="state.article.main_image"
+                  alt="Главное изображение статьи"
+                  (click)="openImage(state.article.main_image!)"
                 />
-              </mat-form-field>
-
-              @if (state.article.main_image) {
-                <div class="main-image-block">
-                  <b>Предпросмотр изображения:</b>
-
-                  <img
-                    class="main-image"
-                    [src]="state.article.main_image"
-                    alt="Главное изображение статьи"
-                  />
+              </div>
+            }
+            @if (state.originalTags.length) {
+              <div class="meta-tags">
+                <b>Теги (оригинал):</b>
+                <div class="tags original">
+                  @for (tag of state.originalTags; track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
                 </div>
-              }
+              </div>
+            }
 
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Теги оригинала</mat-label>
-                <textarea
-                  matInput
-                  rows="4"
-                  [(ngModel)]="state.originalTagsText"
-                  placeholder="Каждый тег с новой строки"
-                ></textarea>
-              </mat-form-field>
+            @if (state.translatedTags.length) {
+              <div class="meta-tags">
+                <b>Теги (русский):</b>
+                <div class="tags translated">
+                  @for (tag of state.translatedTags; track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="meta-edit">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Заголовок</mat-label>
+              <input matInput [(ngModel)]="state.article.title" />
+            </mat-form-field>
 
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Теги на русском</mat-label>
-                <textarea
-                  matInput
-                  rows="4"
-                  [(ngModel)]="state.translatedTagsText"
-                  placeholder="Каждый тег с новой строки"
-                ></textarea>
-              </mat-form-field>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Автор</mat-label>
+              <input matInput [(ngModel)]="state.article.author" />
+            </mat-form-field>
 
-              <button
-                matButton="filled"
-                type="button"
-                (click)="applyEditedTags()"
-              >
-                Применить теги
-              </button>
-            </div>
-          }
-        </section>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Дата</mat-label>
+              <input matInput [(ngModel)]="state.article.date" />
+            </mat-form-field>
 
-        <section class="panel">
-          <div class="panel-title">
-            Сущности
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>URL</mat-label>
+              <input matInput [(ngModel)]="state.article.url" />
+            </mat-form-field>
 
-            <button
-              matButton="outlined"
-              type="button"
-              (click)="requestEntities()"
-              [disabled]="loadingEntities"
-            >
-              Запросить сущности
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Главное изображение</mat-label>
+              <input
+                matInput
+                [(ngModel)]="state.article.main_image"
+                placeholder="https://example.com/image.jpg"
+              />
+            </mat-form-field>
+
+            @if (state.article.main_image) {
+              <div class="main-image-block">
+                <b>Предпросмотр изображения:</b>
+
+                <img
+                  class="main-image"
+                  [src]="state.article.main_image"
+                  alt="Главное изображение статьи"
+                />
+              </div>
+            }
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Теги оригинала</mat-label>
+              <textarea
+                matInput
+                rows="4"
+                [(ngModel)]="state.originalTagsText"
+                placeholder="Каждый тег с новой строки"
+              ></textarea>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Теги на русском</mat-label>
+              <textarea
+                matInput
+                rows="4"
+                [(ngModel)]="state.translatedTagsText"
+                placeholder="Каждый тег с новой строки"
+              ></textarea>
+            </mat-form-field>
+
+            <button matButton="filled" type="button" (click)="applyEditedTags()">
+              Применить теги
             </button>
-          </div>
-
-          @if (loadingEntities) {
-            <mat-spinner diameter="28"></mat-spinner>
-          }
-
-          <div class="entity-block">
-            <b>Упоминания образцов ВВТ</b>
-            <textarea
-              [readonly]="!state.editMode"
-              [ngModel]="state.entities?.military_equipment?.join('\n') || ''"
-              (ngModelChange)="updateEntityList('military_equipment', $event)"
-            ></textarea>
-          </div>
-
-          <div class="entity-block">
-            <b>Производители</b>
-            <textarea
-              [readonly]="!state.editMode"
-              [ngModel]="state.entities?.manufacturers?.join('\n') || ''"
-              (ngModelChange)="updateEntityList('manufacturers', $event)"
-            ></textarea>
-          </div>
-
-          <div class="entity-block">
-            <b>Контракты</b>
-            <textarea
-              [readonly]="!state.editMode"
-              [ngModel]="state.entities?.contracts?.join('\n') || ''"
-              (ngModelChange)="updateEntityList('contracts', $event)"
-            ></textarea>
-          </div>
-        </section>
-      </div>
-
-      <section class="panel full">
-        <div class="panel-title">
-          Исходный текст
-
-          <button
-            matButton="outlined"
-            type="button"
-            (click)="tagOriginal()"
-            [disabled]="loadingOriginalTags"
-          >
-            Тегировать оригинал
-          </button>
-        </div>
-
-        @if (loadingOriginalTags) {
-          <mat-spinner diameter="24"></mat-spinner>
-        }
-
-        <mat-form-field appearance="outline" class="full-width">
-          <textarea
-            matInput
-            rows="12"
-            [(ngModel)]="state.article.text"
-            [readonly]="!state.editMode"
-          ></textarea>
-        </mat-form-field>
-
-        @if (state.originalTags.length) {
-          <div class="tags original">
-            <span class="tag" *ngFor="let t of state.originalTags">{{ t }}</span>
           </div>
         }
       </section>
 
-      <section class="panel full">
+      <section class="panel">
         <div class="panel-title">
-          Текст на русском языке
-
-          <div class="title-actions">
-            <button
-              matButton="outlined"
-              type="button"
-              (click)="translateArticle()"
-              [disabled]="loadingTranslation"
-            >
-              Перевести на русский
-            </button>
-
-            <button
-              matButton="outlined"
-              type="button"
-              (click)="tagTranslated()"
-              [disabled]="!state.translatedText.trim() || loadingTranslatedTags"
-            >
-              Тегировать перевод
-            </button>
-          </div>
-        </div>
-
-        @if (loadingTranslation || loadingTranslatedTags) {
-          <mat-spinner diameter="24"></mat-spinner>
-        }
-
-        <mat-form-field appearance="outline" class="full-width">
-          <textarea
-            matInput
-            rows="12"
-            [(ngModel)]="state.translatedText"
-            [readonly]="!state.editMode"
-            placeholder="Здесь появится перевод"
-          ></textarea>
-        </mat-form-field>
-
-        @if (state.translatedTags.length) {
-          <div class="tags translated">
-            <span class="tag" *ngFor="let t of state.translatedTags">{{ t }}</span>
-          </div>
-        }
-      </section>
-
-      <section class="panel full">
-        <div class="panel-title">
-          Аннотация
+          Сущности
 
           <button
             matButton="outlined"
             type="button"
-            (click)="summarizeArticle()"
-            [disabled]="loadingSummary || !state.translatedText.trim()"
+            (click)="requestEntities()"
+            [disabled]="loadingEntities"
           >
-            Сформировать аннотацию
+            Запросить сущности
           </button>
         </div>
 
-        @if (loadingSummary) {
+        @if (loadingEntities) {
           <mat-spinner diameter="28"></mat-spinner>
         }
 
-        <mat-form-field appearance="outline" class="full-width">
+        <div class="entity-block">
+          <b>Упоминания образцов ВВТ</b>
           <textarea
-            matInput
-            rows="6"
-            [(ngModel)]="state.annotation"
             [readonly]="!state.editMode"
-            placeholder="Аннотация доступна после перевода"
+            [ngModel]="state.entities?.military_equipment?.join('\n') || ''"
+            (ngModelChange)="updateEntityList('military_equipment', $event)"
           ></textarea>
-        </mat-form-field>
+        </div>
+
+        <div class="entity-block">
+          <b>Производители</b>
+          <textarea
+            [readonly]="!state.editMode"
+            [ngModel]="state.entities?.manufacturers?.join('\n') || ''"
+            (ngModelChange)="updateEntityList('manufacturers', $event)"
+          ></textarea>
+        </div>
+
+        <div class="entity-block">
+          <b>Контракты</b>
+          <textarea
+            [readonly]="!state.editMode"
+            [ngModel]="state.entities?.contracts?.join('\n') || ''"
+            (ngModelChange)="updateEntityList('contracts', $event)"
+          ></textarea>
+        </div>
       </section>
-    }
-    @if (imagePreview) {
-      <div class="image-overlay" (click)="closeImage()">
-        <img
-          class="image-full"
-          [src]="imagePreview"
-          (click)="$event.stopPropagation()"
-        />
+    </div>
+
+    <section class="panel full">
+      <div class="panel-title">
+        Исходный текст
+
+        <button
+          matButton="outlined"
+          type="button"
+          (click)="tagOriginal()"
+          [disabled]="loadingOriginalTags"
+        >
+          Тегировать оригинал
+        </button>
       </div>
-    }
-  </mat-card-content>
-</mat-card>
+
+      @if (loadingOriginalTags) {
+        <mat-spinner diameter="24"></mat-spinner>
+      }
+
+      <mat-form-field appearance="outline" class="full-width">
+        <textarea
+          matInput
+          rows="12"
+          [(ngModel)]="state.article.text"
+          [readonly]="!state.editMode"
+        ></textarea>
+      </mat-form-field>
+
+      @if (state.originalTags.length) {
+        <div class="tags original">
+          <span class="tag" *ngFor="let t of state.originalTags">{{ t }}</span>
+        </div>
+      }
+    </section>
+
+    <section class="panel full">
+      <div class="panel-title">
+        Текст на русском языке
+
+        <div class="title-actions">
+          <button
+            matButton="outlined"
+            type="button"
+            (click)="translateArticle()"
+            [disabled]="loadingTranslation"
+          >
+            Перевести на русский
+          </button>
+
+          <button
+            matButton="outlined"
+            type="button"
+            (click)="tagTranslated()"
+            [disabled]="!state.translatedText.trim() || loadingTranslatedTags"
+          >
+            Тегировать перевод
+          </button>
+        </div>
+      </div>
+
+      @if (loadingTranslation || loadingTranslatedTags) {
+        <mat-spinner diameter="24"></mat-spinner>
+      }
+
+      <mat-form-field appearance="outline" class="full-width">
+        <textarea
+          matInput
+          rows="12"
+          [(ngModel)]="state.translatedText"
+          [readonly]="!state.editMode"
+          placeholder="Здесь появится перевод"
+        ></textarea>
+      </mat-form-field>
+
+      @if (state.translatedTags.length) {
+        <div class="tags translated">
+          <span class="tag" *ngFor="let t of state.translatedTags">{{ t }}</span>
+        </div>
+      }
+    </section>
+
+    <section class="panel full">
+      <div class="panel-title">
+        Аннотация
+
+        <button
+          matButton="outlined"
+          type="button"
+          (click)="summarizeArticle()"
+          [disabled]="loadingSummary || !state.translatedText.trim()"
+        >
+          Сформировать аннотацию
+        </button>
+      </div>
+
+      @if (loadingSummary) {
+        <mat-spinner diameter="28"></mat-spinner>
+      }
+
+      <mat-form-field appearance="outline" class="full-width">
+        <textarea
+          matInput
+          rows="6"
+          [(ngModel)]="state.annotation"
+          [readonly]="!state.editMode"
+          placeholder="Аннотация доступна после перевода"
+        ></textarea>
+      </mat-form-field>
+    </section>
+  }
+  @if (imagePreview) {
+    <div class="image-overlay" (click)="closeImage()">
+      <img class="image-full" [src]="imagePreview" (click)="$event.stopPropagation()" />
+    </div>
+  }
+</div>
