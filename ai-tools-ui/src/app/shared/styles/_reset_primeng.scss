@@ -4,7 +4,7 @@
   box-shadow: none;
   font-family: var(--font-family-base);
   font-weight: var(--font-weight-light);
-  height: 45px;
+  height: 40px;
   transition:
     border-color 0.3s ease,
     box-shadow 0.3s ease;
@@ -447,4 +447,23 @@
   &:hover {
     background-color: var(--hover-select-color) !important;
   }
+}
+.p-inputtext,
+.p-inputtextarea {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-detail) !important;
+}
+
+.p-inputtext:disabled,
+.p-inputtextarea:disabled {
+  opacity: 0.8 !important;
+  background: none !important;
+  color: var(--dark-text-color) !important;
+  border: 1px solid transparent !important;;
+}
+
+.p-floatlabel label {
+  font-weight: var(--font-weight-light) !important;
+  font-size: var(--font-size-prewiew) !important;
+  color: var(--primary-text-color) !important;
 }

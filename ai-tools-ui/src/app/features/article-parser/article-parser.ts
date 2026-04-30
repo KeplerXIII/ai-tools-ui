@@ -7,11 +7,15 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
+import { ChipModule } from 'primeng/chip';
+import { ImageModule } from 'primeng/image';
 import { ArticleParserApi } from './article-parser-api';
 import { ArticleParserState } from './article-parser-state';
 import { PrimaryButtonComponent } from '../../shared/ui/primary-button/primary-button.component';
-import { ButtonVariant, OutlineButtonComponent } from '../../shared/ui/outline-button/outline-button.component';
+import {
+  ButtonVariant,
+  OutlineButtonComponent,
+} from '../../shared/ui/outline-button/outline-button.component';
 import { ArticleParserUrlFormComponent } from './article-parser-url-form/article-parser-url-form';
 
 @Component({
@@ -28,6 +32,8 @@ import { ArticleParserUrlFormComponent } from './article-parser-url-form/article
     PrimaryButtonComponent,
     OutlineButtonComponent,
     ArticleParserUrlFormComponent,
+    ChipModule,
+    ImageModule,
   ],
   templateUrl: './article-parser.html',
   styleUrl: './article-parser.scss',
@@ -269,5 +275,34 @@ export class ArticleParser {
       tags: this.state.translatedTags,
       annotation: this.state.annotation,
     });
+  }
+
+  removeOriginalTag(tag: string): void {
+    this.state.originalTags = this.state.originalTags.filter((item) => item !== tag);
+    this.syncTagsToText();
+  }
+
+  removeTranslatedTag(tag: string): void {
+    this.state.translatedTags = this.state.translatedTags.filter((item) => item !== tag);
+    this.syncTagsToText();
+  }
+
+  autoResize(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }
+
+  get mainImageUrl(): string {
+    return this.state.article?.main_image?.trim() || '';
+  }
+
+  onImageLoad(): void {
+    console.log('Картинка загрузилась:', this.mainImageUrl);
+  }
+
+  onImageError(event: Event): void {
+    console.log('Ошибка загрузки картинки:', this.mainImageUrl, event);
   }
 }

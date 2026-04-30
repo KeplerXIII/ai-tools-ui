@@ -1,3 +1,76 @@
+:host ::ng-deep .translated-chip {
+  background-color: rgb(180, 235, 181);
+}
+
+:host ::ng-deep .original-chip {
+  background-color: rgb(180, 220, 235);
+}
+
+:host ::ng-deep .textarea-field label,
+:host ::ng-deep .textarea-field:has(textarea:focus) label,
+:host ::ng-deep .textarea-field:has(textarea:not(:placeholder-shown)) label,
+:host ::ng-deep .textarea-field textarea:focus ~ label {
+  left: 8px !important;
+  inset-inline-start: 8px !important;
+  top: 0 !important;
+
+  transform: translateY(-50%) !important;
+  transform-origin: left center !important;
+  transition: none !important;
+
+  background: #ffffff;
+  padding: 0 4px;
+
+  font-size: 15px !important;
+}
+
+:host ::ng-deep .textarea-field textarea {
+  width: 100% !important;
+  box-sizing: border-box !important;
+
+  font-family: var(--font-family-base) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-detail) !important;
+  line-height: 1.5 !important;
+
+  padding: 17px !important;
+  background: none !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  color: var(--dark-text-color) !important;
+}
+
+:host ::ng-deep .textarea-field textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+:host ::ng-deep .textarea-field textarea:disabled {
+  opacity: 0.8 !important;
+  background: none !important;
+  color: var(--dark-text-color) !important;
+  border: 1px solid transparent !important;
+}
+
+:host ::ng-deep #article_text,
+#translated_text,
+#annotation {
+  font-family: var(--font-family-base) !important;
+  font-weight: var(--font-weight-light) !important;
+  font-size: var(--font-size-detail) !important;
+}
+
+.prime-field {
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep .prime-field textarea.p-inputtextarea {
+  width: 100%;
+  display: block;
+}
+
 .tool-card {
   max-width: 1400px;
   font-family: var(--font-family-base);
@@ -36,11 +109,19 @@
   margin-top: 24px;
 }
 
+.title-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .panel {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  background: var(--table-row-color);
+  border: 1px solid var(--super-light-grey-text-color);
+  border-radius: 10px;
   padding: 16px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.02),
+    0 4px 8px rgba(0, 0, 0, 0.02);
 }
 
 .full {
@@ -49,12 +130,12 @@
 
 .panel-title {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
+  justify-content: space-between;
+  font-size: var(--font-size-xxl);
   font-weight: 600;
-  color: #1e293b;
+  color: var(--primary-text-color);
+  margin-bottom: 10px;
 }
 
 .meta-list {
@@ -68,6 +149,7 @@
   display: grid;
   gap: 6px;
   margin-bottom: 12px;
+  width: 100%;
 
   textarea {
     min-height: 70px;
@@ -110,16 +192,24 @@
 
 /* оригинал — нейтральный */
 .tags.original .tag {
+  border: 1px solid var(--light-grey-text-color);
+  padding: 10px;
+  border-radius: 0px;
   background: #f1f5f9;
   color: #334155;
   border-color: #e2e8f0;
+  font-size: var(--font-size-table);
 }
 
 /* перевод — зелёный */
 .tags.translated .tag {
+  border: 1px solid var(--light-grey-text-color);
+  padding: 10px;
+  border-radius: 0px;
   background: #dcfce7;
-  color: #166534;
+  color: var(--accent-color-success);
   border-color: #bbf7d0;
+  font-size: var(--font-size-table);
 }
 
 @media (max-width: 1000px) {
@@ -128,14 +218,28 @@
   }
 }
 
-.main-image-block {
-  margin-top: 12px;
+:host ::ng-deep .main-image-preview {
+   display: inline-block; 
+}
+
+:host ::ng-deep .main-image-preview .p-image {
+  display: inline-block;
+}
+
+:host ::ng-deep .p-image-preview-indicator {
+  inset: 0;
+}
+
+:host ::ng-deep .main-image-preview img {
+  max-height: 260px;
+  border-radius: 12px;
 }
 
 .main-image {
   display: block;
-  width: 100%;
-  max-height: 260px;
+  max-height: 280px;
+  width: auto;              
+  max-width: 100%;
   object-fit: cover;
   border-radius: 12px;
   margin-top: 8px;
@@ -177,4 +281,52 @@
 
 .main-image.clickable {
   cursor: zoom-in;
+}
+
+.meta-block-one {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meta-block-one-title {
+  display: inline-block;
+  color: var(--light-grey-text-color);
+}
+
+.meta-block-one-text {
+  color: var(--light-grey-text-color);
+}
+
+.chips-wrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.chips-item {
+  border: 1px solid var(--light-grey-text-color);
+  padding: 7px;
+  border-radius: 20px;
+}
+
+.prew-image-title {
+  font-size: var(--font-size-prewiew);
+  font-weight: var(--font-weight-medium);
+}
+
+.prime-field {
+  display: block;
+  width: 100%;
+  --p-floatlabel-focus-color: var(--primary-text-color-light);
+}
+
+.prime-field input {
+  width: 100%;
+}
+
+.title-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
