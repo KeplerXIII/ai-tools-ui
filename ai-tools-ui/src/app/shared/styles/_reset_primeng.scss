@@ -2,6 +2,7 @@
   border: 1px solid var(--light-grey-text-color);
   border-radius: 0 !important;
   box-shadow: none;
+  background: var(--light-text-color) !important;
   font-family: var(--font-family-base);
   font-weight: var(--font-weight-light);
   height: 40px;
@@ -452,18 +453,25 @@
 .p-inputtextarea {
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-detail) !important;
+  color: var(--primary-text-color) !important;
+  border-color: #cbd5e1 !important;
 }
 
 .p-inputtext:disabled,
 .p-inputtextarea:disabled {
   opacity: 0.8 !important;
   background: none !important;
-  color: var(--dark-text-color) !important;
-  border: 1px solid transparent !important;;
+  color: var(--primary-text-color) !important;
+  border: 1px solid transparent !important;
 }
 
 .p-floatlabel label {
   font-weight: var(--font-weight-light) !important;
   font-size: var(--font-size-prewiew) !important;
   color: var(--primary-text-color) !important;
+  background: var(--light-text-color) !important;
+}
+
+.p-chip-remove-icon {
+  color: var(--dark-text-color) !important;
 }

@@ -46,7 +46,10 @@ export class ArticleParser {
   loadingSummary = false;
   loadingOriginalTags = false;
   loadingTranslatedTags = false;
-
+  entitiesError = '';
+  articleError = '';
+  originalTagsError = '';
+  translationError = '';
   imagePreview: string | null = null;
 
   openImage(url: string) {
@@ -70,7 +73,11 @@ export class ArticleParser {
     const value = this.state.url.trim();
     if (!value) return;
 
+    this.articleError = '';
     this.state.error = '';
+    this.entitiesError = '';
+    this.originalTagsError = '';
+    this.translationError = '';
     this.state.article = null;
     this.state.entities = null;
     this.state.translatedText = '';
@@ -89,7 +96,7 @@ export class ArticleParser {
         this.loadingArticle = false;
       },
       error: () => {
-        this.state.error = 'Ошибка при извлечении статьи';
+        this.articleError = 'Ошибка при извлечении статьи';
         this.loadingArticle = false;
       },
     });
@@ -99,7 +106,7 @@ export class ArticleParser {
     if (!this.state.article?.text) return;
 
     this.loadingEntities = true;
-    this.state.error = '';
+    this.entitiesError = '';
     this.state.entities = null;
 
     this.api.extractEntities(this.state.article.text).subscribe({
@@ -108,7 +115,7 @@ export class ArticleParser {
         this.loadingEntities = false;
       },
       error: () => {
-        this.state.error = 'Ошибка при извлечении сущностей';
+        this.entitiesError = 'Ошибка при извлечении сущностей';
         this.loadingEntities = false;
       },
     });
@@ -118,6 +125,7 @@ export class ArticleParser {
     if (!this.state.article?.text) return;
 
     this.loadingTranslation = true;
+    this.translationError = '';
     this.state.error = '';
     this.state.translatedText = '';
     this.state.annotation = '';
@@ -130,7 +138,7 @@ export class ArticleParser {
         this.loadingTranslation = false;
       },
       error: () => {
-        this.state.error = 'Ошибка при переводе статьи';
+        this.translationError = 'Ошибка при переводе статьи';
         this.loadingTranslation = false;
       },
     });
@@ -157,6 +165,11 @@ export class ArticleParser {
 
   clear(): void {
     this.state.clear();
+    this.entitiesError = '';
+    this.articleError = '';
+    this.originalTagsError = '';
+    this.translationError = '';
+    this.translationError = '';
   }
 
   // =========================
@@ -167,7 +180,7 @@ export class ArticleParser {
     if (!this.state.article?.text) return;
 
     this.loadingOriginalTags = true;
-    this.state.error = '';
+    this.originalTagsError = '';
 
     this.api.tagText(this.state.article.text).subscribe({
       next: (res) => {
@@ -176,7 +189,7 @@ export class ArticleParser {
         this.loadingOriginalTags = false;
       },
       error: () => {
-        this.state.error = 'Ошибка при тегировании оригинала';
+        this.originalTagsError = 'Ошибка тегирования оригинала';
         this.loadingOriginalTags = false;
       },
     });
@@ -304,5 +317,16 @@ export class ArticleParser {
 
   onImageError(event: Event): void {
     console.log('Ошибка загрузки картинки:', this.mainImageUrl, event);
+  }
+
+  get hasEntitiesBlock(): boolean {
+    return (
+      this.loadingEntities ||
+      !!this.state.entities?.military_equipment?.length ||
+      !!this.state.entities?.manufacturers?.length ||
+      !!this.state.entities?.contracts?.length ||
+      this.state.originalTags.length > 0 ||
+      this.state.translatedTags.length > 0
+    );
   }
 }

@@ -1,9 +1,16 @@
 :host ::ng-deep .translated-chip {
   background-color: rgb(180, 235, 181);
+  color: var(--dark-text-color);
 }
 
 :host ::ng-deep .original-chip {
   background-color: rgb(180, 220, 235);
+  color: var(--dark-text-color);
+}
+
+:host ::ng-deep .chip-item {
+  background-color: var(--default-chips-color);
+  color: var(--dark-text-color);
 }
 
 :host ::ng-deep .textarea-field label,
@@ -37,7 +44,7 @@
   background: none !important;
   border: 1px solid #cbd5e1 !important;
   border-radius: 0 !important;
-  color: var(--dark-text-color) !important;
+  color: var(--primary-text-color) !important;
 }
 
 :host ::ng-deep .textarea-field textarea:focus {
@@ -49,7 +56,7 @@
 :host ::ng-deep .textarea-field textarea:disabled {
   opacity: 0.8 !important;
   background: none !important;
-  color: var(--dark-text-color) !important;
+  color: var(--primary-text-color) !important;
   border: 1px solid transparent !important;
 }
 
@@ -103,10 +110,12 @@
 }
 
 .article-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 24px;
   margin-top: 24px;
+  align-items: start;
+  width: 100%;
 }
 
 .title-actions {
@@ -116,12 +125,30 @@
 
 .panel {
   background: var(--table-row-color);
+  width: 100%;
   border: 1px solid var(--super-light-grey-text-color);
   border-radius: 10px;
   padding: 16px;
+  align-self: start;
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.02),
     0 4px 8px rgba(0, 0, 0, 0.02);
+}
+
+.meta-panel {
+  display: flex;
+  gap: 20px;
+}
+
+.prew-image-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.image-prew-title {
+  color: var(--primary-text-color);
+  font-weight: var(--font-weight-medium);
 }
 
 .full {
@@ -143,6 +170,15 @@
   gap: 8px;
   color: #334155;
   font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.field-error {
+  min-height: 18px;
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--error-text-color);
 }
 
 .entity-block {
@@ -219,7 +255,7 @@
 }
 
 :host ::ng-deep .main-image-preview {
-   display: inline-block; 
+  display: inline-block;
 }
 
 :host ::ng-deep .main-image-preview .p-image {
@@ -238,7 +274,7 @@
 .main-image {
   display: block;
   max-height: 280px;
-  width: auto;              
+  width: auto;
   max-width: 100%;
   object-fit: cover;
   border-radius: 12px;
@@ -287,6 +323,11 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+}
+
+.meta-wrapper {
+  width: 100%;
 }
 
 .meta-block-one-title {
@@ -329,4 +370,19 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+}
+
+.translate-teg-btn {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.teg-btn-wrapper,
+.translate-btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 56px;
 }

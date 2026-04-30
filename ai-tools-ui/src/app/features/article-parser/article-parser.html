@@ -40,207 +40,261 @@
     <mat-spinner diameter="28"></mat-spinner>
   }
 
-  @if (state.error) {
-    <div class="error">{{ state.error }}</div>
+  @if (articleError) {
+    <div class="field-error">{{ articleError }}</div>
   }
 
   @if (state.article) {
     <div class="article-grid">
-      <section class="panel">
-        <div class="title-wrapper">
-          <h3 class="panel-title">Метаданные</h3>
-          <div class="chips-wrapper">
-            <p-chip label="Длина: {{ state.article.length }}" class="chip-item"></p-chip>
+      <section class="panel meta-panel">
+        <div class="meta-wrapper">
+          <div class="title-wrapper">
+            <h3 class="panel-title">Метаданные</h3>
+            <div class="chips-wrapper">
+              @if (state.article.length) {
+                <p-chip label="Длина: {{ state.article.length }}" class="chip-item" />
+              }
 
-            <p-chip label="Качество: {{ state.article.quality }}" class="chip-item"></p-chip>
+              @if (state.article.quality) {
+                <p-chip label="Качество: {{ state.article.quality }}" class="chip-item" />
+              }
 
-            <p-chip
-              [label]="'Требует проверки: ' + (state.article.needs_review ? 'да' : 'нет')"
-              class="chip-item"
-            ></p-chip>
+              @if (
+                state.article.needs_review !== null && state.article.needs_review !== undefined
+              ) {
+                <p-chip
+                  [label]="'Требует проверки: ' + (state.article.needs_review ? 'да' : 'нет')"
+                  class="chip-item"
+                />
+              }
+            </div>
           </div>
-        </div>
+          <div class="meta-list">
+            <div class="meta-block-one">
+              <p-floatlabel variant="on" class="prime-field full-width">
+                <input
+                  pInputText
+                  id="article_title"
+                  name="article_title"
+                  [ngModel]="
+                    state.editMode ? state.article.title : state.article.title || 'Нет информации'
+                  "
+                  [disabled]="!state.editMode"
+                />
+                <label class="label-input" for="article_title">Заголовок</label>
+              </p-floatlabel>
 
-        <div class="meta-list">
-          <div class="meta-block-one">
-            <p-floatlabel variant="on" class="prime-field full-width">
-              <input
-                pInputText
-                id="article_title"
-                name="article_title"
-                [(ngModel)]="state.article.title"
-                [disabled]="!state.editMode"
-              />
-              <label class="label-input" for="article_title">Заголовок</label>
-            </p-floatlabel>
+              <p-floatlabel variant="on" class="prime-field full-width">
+                <input
+                  pInputText
+                  id="article_author"
+                  name="article_author"
+                  [ngModel]="
+                    state.editMode ? state.article.author : state.article.author || 'Нет информации'
+                  "
+                  [disabled]="!state.editMode"
+                />
+                <label for="article_author">Автор</label>
+              </p-floatlabel>
 
-            <p-floatlabel variant="on" class="prime-field full-width">
-              <input
-                pInputText
-                id="article_author"
-                name="article_author"
-                [(ngModel)]="state.article.author"
-                [disabled]="!state.editMode"
-              />
-              <label for="article_author">Автор</label>
-            </p-floatlabel>
+              <p-floatlabel variant="on" class="prime-field full-width">
+                <input
+                  pInputText
+                  id="article_date"
+                  name="article_date"
+                  [ngModel]="
+                    state.editMode ? state.article.date : state.article.date || 'Нет информации'
+                  "
+                  [disabled]="!state.editMode"
+                />
+                <label for="article_date">Дата</label>
+              </p-floatlabel>
 
-            <p-floatlabel variant="on" class="prime-field full-width">
-              <input
-                pInputText
-                id="article_date"
-                name="article_date"
-                [(ngModel)]="state.article.date"
-                [disabled]="!state.editMode"
-              />
-              <label for="article_date">Дата</label>
-            </p-floatlabel>
+              <p-floatlabel variant="on" class="prime-field full-width">
+                <input
+                  pInputText
+                  id="article_url"
+                  name="article_url"
+                  [ngModel]="
+                    state.editMode ? state.article.url : state.article.url || 'Нет информации'
+                  "
+                  [disabled]="!state.editMode"
+                />
+                <label for="article_url">URL</label>
+              </p-floatlabel>
 
-            <p-floatlabel variant="on" class="prime-field full-width">
-              <input
-                pInputText
-                id="article_url"
-                name="article_url"
-                [(ngModel)]="state.article.url"
-                [disabled]="!state.editMode"
-              />
-              <label for="article_url">URL</label>
-            </p-floatlabel>
-
-            <p-floatlabel variant="on" class="prime-field full-width">
-              <input
-                pInputText
-                id="article_main_image"
-                name="article_main_image"
-                [(ngModel)]="state.article.main_image"
-                [disabled]="!state.editMode"
-                placeholder="https://example.com/image.jpg"
-              />
-              <label for="article_main_image">Главное изображение</label>
-            </p-floatlabel>
-            @if (mainImageUrl) {
-              <p-image
-                [src]="mainImageUrl"
-                alt="Главное изображение статьи"
-                [preview]="true"
-                width="350"
-                (onImageError)="onImageError($event)"
-              />
-            }
+              <p-floatlabel variant="on" class="prime-field full-width">
+                <input
+                  pInputText
+                  id="article_main_image"
+                  name="article_main_image"
+                  [ngModel]="
+                    state.editMode
+                      ? state.article.main_image
+                      : state.article.main_image || 'Нет информации'
+                  "
+                  [disabled]="!state.editMode"
+                  placeholder="https://example.com/image.jpg"
+                />
+                <label for="article_main_image">Главное изображение</label>
+              </p-floatlabel>
+            </div>
           </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="title-wrapper">
-          <h3 class="panel-title">Сущности</h3>
           <app-outline-button
-            text="Запросить сущности"
+            text="Извлечь сущности"
             size="large"
             [variant]="ButtonVariant.Rounded"
             [disabled]="loadingEntities"
             (clicked)="requestEntities()"
           />
+          @if (entitiesError) {
+            <div class="field-error">{{ entitiesError }}</div>
+          }
         </div>
-
-        @if (loadingEntities) {
-          <mat-spinner diameter="28"></mat-spinner>
-        }
-
-        <div class="entity-block">
-          <p-floatlabel variant="on" class="prime-field full-width textarea-field">
-            <textarea
-              pTextarea
-              id="military_equipment"
-              name="military_equipment"
-              [disabled]="!state.editMode"
-              [ngModel]="state.entities?.military_equipment?.join('\n') || ''"
-              (ngModelChange)="updateEntityList('military_equipment', $event)"
-              rows="3"
-              class="full-width"
-              style="resize: none"
-            ></textarea>
-            <label for="military_equipment">Упоминания образцов ВВТ</label>
-          </p-floatlabel>
-        </div>
-
-        <div class="entity-block">
-          <p-floatlabel variant="on" class="prime-field full-width textarea-field">
-            <textarea
-              pTextarea
-              id="manufacturers"
-              name="manufacturers"
-              [disabled]="!state.editMode"
-              [ngModel]="state.entities?.manufacturers?.join('\n') || ''"
-              (ngModelChange)="updateEntityList('manufacturers', $event)"
-              rows="3"
-              class="full-width"
-              style="resize: none"
-            ></textarea>
-            <label for="manufacturers">Производители</label>
-          </p-floatlabel>
-        </div>
-
-        <div class="entity-block">
-          <p-floatlabel variant="on" class="prime-field full-width textarea-field">
-            <textarea
-              pTextarea
-              id="contracts"
-              name="contracts"
-              [disabled]="!state.editMode"
-              [ngModel]="state.entities?.contracts?.join('\n') || ''"
-              (ngModelChange)="updateEntityList('contracts', $event)"
-              rows="3"
-              class="full-width"
-              style="resize: none"
-            ></textarea>
-            <label for="contracts">Контракты</label>
-          </p-floatlabel>
-        </div>
-        @if (state.originalTags.length) {
-          <div class="meta-tags">
-            <h4 class="">Теги (оригинал):</h4>
-            <div class="tags original">
-              @for (tag of state.originalTags; track tag) {
-                <p-chip
-                  label="{{ tag }}"
-                  class="original-chip"
-                  [removable]="state.editMode"
-                  (onRemove)="removeOriginalTag(tag)"
-                />
-              }
-            </div>
-          </div>
-        }
-
-        @if (state.translatedTags.length) {
-          <div class="meta-tags">
-            <b>Теги (русский):</b>
-            <div class="tags translated">
-              @for (tag of state.translatedTags; track tag) {
-                <p-chip
-                  label="{{ tag }}"
-                  class="translated-chip"
-                  [removable]="state.editMode"
-                  (onRemove)="removeTranslatedTag(tag)"
-                />
-              }
-            </div>
+        @if (mainImageUrl) {
+          <div class="prew-image-block">
+            <p class="image-prew-title">Предпросмотр изображения:</p>
+            <p-image
+              [src]="mainImageUrl"
+              alt="Главное изображение статьи"
+              [preview]="true"
+              width="500"
+              (onImageError)="onImageError($event)"
+            />
           </div>
         }
       </section>
+      @if (hasEntitiesBlock) {
+        <section class="panel">
+          <div class="title-wrapper">
+            <h3 class="panel-title">Сущности</h3>
+          </div>
+
+          @if (loadingEntities) {
+            <mat-spinner diameter="28"></mat-spinner>
+          }
+
+          @if (state.entities?.military_equipment?.length) {
+            <div class="entity-block">
+              <p-floatlabel variant="on" class="prime-field full-width textarea-field">
+                <textarea
+                  pTextarea
+                  id="military_equipment"
+                  name="military_equipment"
+                  [disabled]="!state.editMode"
+                  [ngModel]="state.entities?.military_equipment?.join('\n') || ''"
+                  (ngModelChange)="updateEntityList('military_equipment', $event)"
+                  rows="3"
+                  class="full-width"
+                  style="resize: none"
+                ></textarea>
+                <label for="military_equipment">Упоминания образцов ВВТ</label>
+              </p-floatlabel>
+            </div>
+          }
+
+          @if (state.entities?.manufacturers?.length) {
+            <div class="entity-block">
+              <p-floatlabel variant="on" class="prime-field full-width textarea-field">
+                <textarea
+                  pTextarea
+                  id="manufacturers"
+                  name="manufacturers"
+                  [disabled]="!state.editMode"
+                  [ngModel]="state.entities?.manufacturers?.join('\n') || ''"
+                  (ngModelChange)="updateEntityList('manufacturers', $event)"
+                  rows="3"
+                  class="full-width"
+                  style="resize: none"
+                ></textarea>
+                <label for="manufacturers">Производители</label>
+              </p-floatlabel>
+            </div>
+          }
+
+          @if (state.entities?.contracts?.length) {
+            <div class="entity-block">
+              <p-floatlabel variant="on" class="prime-field full-width textarea-field">
+                <textarea
+                  pTextarea
+                  id="contracts"
+                  name="contracts"
+                  [disabled]="!state.editMode"
+                  [ngModel]="state.entities?.contracts?.join('\n') || ''"
+                  (ngModelChange)="updateEntityList('contracts', $event)"
+                  rows="3"
+                  class="full-width"
+                  style="resize: none"
+                ></textarea>
+                <label for="contracts">Контракты</label>
+              </p-floatlabel>
+            </div>
+          }
+          @if (state.originalTags.length) {
+            <div class="meta-tags">
+              <h4 class="">Теги (оригинал):</h4>
+              <div class="tags original">
+                @for (tag of state.originalTags; track tag) {
+                  <p-chip
+                    label="{{ tag }}"
+                    class="original-chip"
+                    [removable]="state.editMode"
+                    (onRemove)="removeOriginalTag(tag)"
+                  />
+                }
+              </div>
+            </div>
+          }
+
+          @if (state.translatedTags.length) {
+            <div class="meta-tags">
+              <b>Теги (русский):</b>
+              <div class="tags translated">
+                @for (tag of state.translatedTags; track tag) {
+                  <p-chip
+                    label="{{ tag }}"
+                    class="translated-chip"
+                    [removable]="state.editMode"
+                    (onRemove)="removeTranslatedTag(tag)"
+                  />
+                }
+              </div>
+            </div>
+          }
+        </section>
+      }
     </div>
 
     <section class="panel full">
       <div class="title-wrapper">
         <h3 class="panel-title">Исходный текст</h3>
-        <app-outline-button
-          text="Тегировать оригинал"
-          size="large"
-          [variant]="ButtonVariant.Rounded"
-          [disabled]="loadingOriginalTags"
-          (clicked)="tagOriginal()"
-        />
+        <div class="translate-teg-btn">
+          <div class="translate-btn-wrapper">
+            <app-outline-button
+              text="Перевести на русский"
+              size="large"
+              [variant]="ButtonVariant.Rounded"
+              [disabled]="loadingTranslation"
+              (clicked)="translateArticle()"
+            />
+            @if (translationError) {
+              <div class="field-error">{{ translationError }}</div>
+            }
+          </div>
+
+          <div class="teg-btn-wrapper">
+            <app-outline-button
+              text="Тегировать оригинал"
+              size="large"
+              [variant]="ButtonVariant.Rounded"
+              [disabled]="loadingOriginalTags"
+              (clicked)="tagOriginal()"
+            />
+            @if (originalTagsError) {
+              <div class="field-error">{{ originalTagsError }}</div>
+            }
+          </div>
+        </div>
       </div>
 
       @if (loadingOriginalTags) {
@@ -267,52 +321,41 @@
       }
     </section>
 
-    <section class="panel full">
-      <div class="title-wrapper">
-        <h3 class="panel-title">Текст на русском языке</h3>
-        <div class="title-actions">
-          <app-outline-button
-            text="Перевести на русский"
-            size="large"
-            [variant]="ButtonVariant.Rounded"
-            [disabled]="loadingTranslation"
-            (clicked)="translateArticle()"
-          />
+    @if (state.translatedText.trim()) {
+      <section class="panel full">
+        <div class="title-wrapper">
+          <h3 class="panel-title">Текст на русском языке</h3>
 
-          <app-outline-button
-            text="Тегировать перевод"
-            size="large"
-            [variant]="ButtonVariant.Rounded"
-            [disabled]="!state.translatedText.trim() || loadingTranslatedTags"
-            (clicked)="tagTranslated()"
-          />
+          <div class="title-actions">
+            <app-outline-button
+              text="Тегировать перевод"
+              size="large"
+              [variant]="ButtonVariant.Rounded"
+              [disabled]="loadingTranslatedTags"
+              (clicked)="tagTranslated()"
+            />
+          </div>
         </div>
-      </div>
 
-      @if (loadingTranslation || loadingTranslatedTags) {
-        <mat-spinner diameter="24"></mat-spinner>
-      }
+        @if (loadingTranslatedTags) {
+          <mat-spinner diameter="24"></mat-spinner>
+        }
 
-      <p-floatlabel variant="on" class="prime-field full-width textarea-field">
-        <textarea
-          pTextarea
-          id="translated_text"
-          name="translated_text"
-          [(ngModel)]="state.translatedText"
-          [disabled]="!state.editMode"
-          rows="8"
-          class="full-width"
-          placeholder="Здесь появится перевод"
-          style="resize: none"
-        ></textarea>
-      </p-floatlabel>
-
-      @if (state.translatedTags.length) {
-        <div class="tags translated">
-          <span class="tag" *ngFor="let t of state.translatedTags">{{ t }}</span>
-        </div>
-      }
-    </section>
+        <p-floatlabel variant="on" class="prime-field full-width textarea-field">
+          <textarea
+            pTextarea
+            id="translated_text"
+            name="translated_text"
+            [(ngModel)]="state.translatedText"
+            [disabled]="!state.editMode"
+            rows="8"
+            class="full-width"
+            placeholder="Здесь появится перевод"
+            style="resize: none"
+          ></textarea>
+        </p-floatlabel>
+      </section>
+    }
 
     <section class="panel full">
       <div class="title-wrapper">
