@@ -377,7 +377,9 @@
 
       @if (state.originalTags.length) {
         <div class="tags original">
-          <span class="tag" *ngFor="let t of state.originalTags">{{ t }}</span>
+          @for (tag of state.originalTags; track tag) {
+            <span class="tag">{{ tag }}</span>
+          }
         </div>
       }
     </section>

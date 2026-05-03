@@ -12,7 +12,6 @@ import { ChipModule } from 'primeng/chip';
 import { ImageModule } from 'primeng/image';
 import { ArticleParserApi } from './article-parser-api';
 import { ArticleParserState } from './article-parser-state';
-import { PrimaryButtonComponent } from '../../shared/ui/primary-button/primary-button.component';
 import {
   ButtonVariant,
   OutlineButtonComponent,
@@ -30,7 +29,6 @@ import { ArticleParserUrlFormComponent } from './article-parser-url-form/article
     MatProgressSpinnerModule,
     FloatLabelModule,
     InputTextModule,
-    PrimaryButtonComponent,
     OutlineButtonComponent,
     ArticleParserUrlFormComponent,
     ChipModule,
