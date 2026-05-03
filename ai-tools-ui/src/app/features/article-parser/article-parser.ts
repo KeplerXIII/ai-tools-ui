@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { SkeletonModule } from 'primeng/skeleton';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ChipModule } from 'primeng/chip';
 import { ImageModule } from 'primeng/image';
@@ -34,6 +35,7 @@ import { ArticleParserUrlFormComponent } from './article-parser-url-form/article
     ArticleParserUrlFormComponent,
     ChipModule,
     ImageModule,
+    SkeletonModule,
   ],
   templateUrl: './article-parser.html',
   styleUrl: './article-parser.scss',

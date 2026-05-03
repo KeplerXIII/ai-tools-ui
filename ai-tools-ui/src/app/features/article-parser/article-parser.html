@@ -10,7 +10,14 @@
     (submitUrl)="extractArticle()"
     (clearClicked)="clear()"
   />
-  @if (state.article) {
+  @if (loadingArticle) {
+    <div class="btn-wrapper">
+      <p-skeleton height="2.5rem" width="12rem" borderRadius="20px" />
+      <p-skeleton height="2.5rem" width="12rem" borderRadius="20px" />
+      <p-skeleton height="2.5rem" width="12rem" borderRadius="20px" />
+    </div>
+  }
+  @if (state.article && !loadingArticle) {
     <div class="btn-wrapper">
       <app-outline-button
         [text]="state.editMode ? 'Завершить редактирование' : 'Редактировать'"
@@ -36,12 +43,59 @@
     </div>
   }
 
-  @if (loadingArticle) {
-    <mat-spinner diameter="28"></mat-spinner>
-  }
-
   @if (articleError) {
     <div class="field-error">{{ articleError }}</div>
+  }
+
+  @if (loadingArticle) {
+    <div class="article-grid">
+      <section class="panel meta-panel">
+        <div class="meta-wrapper">
+          <div class="title-wrapper">
+            <p-skeleton width="12rem" height="1.5rem" borderRadius="12px" />
+          </div>
+
+          <div class="meta-list">
+            <div class="meta-block-one">
+              <p-skeleton height="1.5rem" borderRadius="12px" />
+              <p-skeleton height="1.5rem" borderRadius="12px" />
+              <p-skeleton height="1.5rem" borderRadius="12px" />
+              <p-skeleton height="1.5rem" borderRadius="12px" />
+              <p-skeleton height="1.5rem" borderRadius="12px" />
+              <p-skeleton height="1.5rem" borderRadius="12px" />
+              <p-skeleton height="1.5rem" borderRadius="12px" />
+            </div>
+          </div>
+
+          <p-skeleton width="12rem" height="2.5rem" borderRadius="20px" />
+        </div>
+
+        <div class="prew-image-block">
+          <p-skeleton width="12rem" height="1.5rem" borderRadius="12px" />
+          <p-skeleton width="31rem" height="20rem" borderRadius="16px" />
+        </div>
+      </section>
+    </div>
+
+    <section class="panel full">
+      <div class="title-wrapper">
+        <p-skeleton width="12rem" height="1.5rem" borderRadius="12px" />
+
+        <div class="translate-teg-btn">
+          <p-skeleton width="12rem" height="2.5rem" borderRadius="20px" />
+          <p-skeleton width="12rem" height="2.5rem" borderRadius="20px" />
+        </div>
+      </div>
+      <div class="sceleton-translate-text">
+        <p-skeleton height="1.5rem" borderRadius="12px" />
+        <p-skeleton height="1.5rem" borderRadius="12px" />
+        <p-skeleton height="1.5rem" borderRadius="12px" />
+        <p-skeleton height="1.5rem" borderRadius="12px" />
+        <p-skeleton height="1.5rem" borderRadius="12px" />
+        <p-skeleton height="1.5rem" borderRadius="12px" />
+        <p-skeleton height="1.5rem" borderRadius="12px" />
+      </div>
+    </section>
   }
 
   @if (state.article) {
@@ -171,7 +225,14 @@
           </div>
 
           @if (loadingEntities) {
-            <mat-spinner diameter="28"></mat-spinner>
+            <div class="entities-sceleton-wrapper">
+              <p-skeleton width="10rem" height="1rem" />
+              <p-skeleton width="85rem" height="1rem" />
+              <p-skeleton width="85rem" height="1rem" />
+              <p-skeleton width="85rem" height="1rem" />
+              <p-skeleton width="85rem" height="1rem" />
+              <p-skeleton width="85rem" height="1rem" />
+            </div>
           }
 
           @if (state.entities?.military_equipment?.length) {
@@ -334,6 +395,13 @@
               [disabled]="loadingTranslatedTags"
               (clicked)="tagTranslated()"
             />
+            <app-outline-button
+              text="Сформировать аннотацию"
+              size="large"
+              [variant]="ButtonVariant.Rounded"
+              [disabled]="loadingSummary || !state.translatedText.trim()"
+              (clicked)="summarizeArticle()"
+            />
           </div>
         </div>
 
@@ -357,35 +425,30 @@
       </section>
     }
 
-    <section class="panel full">
-      <div class="title-wrapper">
-        <h3 class="panel-title">Аннотация</h3>
-        <app-outline-button
-          text="Сформировать аннотацию"
-          size="large"
-          [variant]="ButtonVariant.Rounded"
-          [disabled]="loadingSummary || !state.translatedText.trim()"
-          (clicked)="summarizeArticle()"
-        />
-      </div>
+    @if (state.annotation.trim()) {
+      <section class="panel full">
+        <div class="title-wrapper">
+          <h3 class="panel-title">Аннотация</h3>
+        </div>
 
-      @if (loadingSummary) {
-        <mat-spinner diameter="28"></mat-spinner>
-      }
+        @if (loadingSummary) {
+          <mat-spinner diameter="28"></mat-spinner>
+        }
 
-      <p-floatlabel variant="on" class="prime-field full-width textarea-field">
-        <textarea
-          pTextarea
-          id="annotation"
-          name="annotation"
-          [(ngModel)]="state.annotation"
-          [disabled]="!state.editMode"
-          rows="6"
-          class="full-width"
-          placeholder="Аннотация доступна после перевода"
-          style="resize: none"
-        ></textarea>
-      </p-floatlabel>
-    </section>
+        <p-floatlabel variant="on" class="prime-field full-width textarea-field">
+          <textarea
+            pTextarea
+            id="annotation"
+            name="annotation"
+            [(ngModel)]="state.annotation"
+            [disabled]="!state.editMode"
+            rows="6"
+            class="full-width"
+            placeholder="Аннотация доступна после перевода"
+            style="resize: none"
+          ></textarea>
+        </p-floatlabel>
+      </section>
+    }
   }
 </div>
