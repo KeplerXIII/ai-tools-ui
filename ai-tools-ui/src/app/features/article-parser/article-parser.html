@@ -6,7 +6,7 @@
 
   <app-article-parser-url-form
     [(url)]="state.url"
-    [loading]="loadingArticle"
+    [loading]="isDisabled"
     (submitUrl)="extractArticle()"
     (clearClicked)="clear()"
   />
@@ -23,6 +23,7 @@
     <div class="btn-wrapper">
       <app-outline-button
         [text]="state.editMode ? 'Завершить редактирование' : 'Редактировать'"
+        [disabled]="isLoading"
         iconName="pi pi-pen-to-square"
         size="large"
         [variant]="ButtonVariant.Rounded"
@@ -204,7 +205,7 @@
             text="Извлечь сущности"
             size="large"
             [variant]="ButtonVariant.Rounded"
-            [disabled]="loadingEntities"
+            [disabled]="isDisabled"
             (clicked)="requestEntities()"
           />
 
@@ -245,9 +246,7 @@
           }
 
           @if (hasEmptyEntitiesResult) {
-            <p class="empty-entities-message">
-              В данном документе не было обнаружено сущностей.
-            </p>
+            <p class="empty-entities-message">В данном документе не было обнаружено сущностей.</p>
           }
 
           @if (state.entities?.military_equipment?.length) {
@@ -384,7 +383,7 @@
               text="Перевести на русский"
               size="large"
               [variant]="ButtonVariant.Rounded"
-              [disabled]="loadingTranslation"
+              [disabled]="isDisabled"
               (clicked)="translateArticle()"
             />
 
@@ -398,7 +397,7 @@
               text="Тегировать оригинал"
               size="large"
               [variant]="ButtonVariant.Rounded"
-              [disabled]="loadingOriginalTags"
+              [disabled]="isDisabled"
               (clicked)="tagOriginal()"
             />
 
@@ -410,16 +409,22 @@
       </div>
 
       <p-floatlabel variant="on" class="prime-field full-width textarea-field">
-        <textarea
-          pTextarea
-          id="article_text"
-          name="article_text"
-          [(ngModel)]="state.article.text"
-          [disabled]="!state.editMode"
-          rows="8"
-          class="full-width"
-          style="resize: none"
-        ></textarea>
+        @if (state.editMode) {
+          <textarea
+            pTextarea
+            id="article_text"
+            class="full-width custom-textarea-scroll"
+            name="article_text"
+            [(ngModel)]="state.article.text"
+            rows="8"
+            style="resize: none"
+          ></textarea>
+        } @else {
+          <div
+            class="highlighted-article-text custom-textarea-scroll"
+            [innerHTML]="highlightedArticleText"
+          ></div>
+        }
       </p-floatlabel>
     </section>
 
@@ -433,7 +438,7 @@
               text="Тегировать перевод"
               size="large"
               [variant]="ButtonVariant.Rounded"
-              [disabled]="loadingTranslatedTags || loadingTranslation"
+              [disabled]="isDisabled"
               (clicked)="tagTranslated()"
             />
 
@@ -441,13 +446,13 @@
               text="Сформировать аннотацию"
               size="large"
               [variant]="ButtonVariant.Rounded"
-              [disabled]="loadingSummary || loadingTranslation || !state.translatedText.trim()"
+              [disabled]="isDisabled || !state.translatedText.trim()"
               (clicked)="summarizeArticle()"
             />
           </div>
         </div>
 
-        @if (loadingTranslation) {
+        @if (loadingTranslation && !state.translatedText) {
           <div #translationSkeleton class="sceleton-translate-text">
             <p-skeleton height="1rem" borderRadius="12px" />
             <p-skeleton height="1rem" borderRadius="12px" />
@@ -457,16 +462,17 @@
             <p-skeleton height="1rem" borderRadius="12px" />
             <p-skeleton height="1rem" borderRadius="12px" />
           </div>
-        } @else {
+        }
+        @if (state.translatedText) {
           <p-floatlabel variant="on" class="prime-field full-width textarea-field">
             <textarea
               pTextarea
               id="translated_text"
               name="translated_text"
+              class="full-width custom-textarea-scroll"
               [(ngModel)]="state.translatedText"
               [disabled]="!state.editMode"
               rows="8"
-              class="full-width"
               placeholder="Здесь появится перевод"
               style="resize: none"
             ></textarea>
@@ -481,7 +487,7 @@
           <h3 class="panel-title">Аннотация</h3>
         </div>
 
-        @if (loadingSummary) {
+        @if (loadingSummary && !state.annotation) {
           <div #annotationSkeleton class="sceleton-translate-text">
             <p-skeleton height="1rem" borderRadius="12px" />
             <p-skeleton height="1rem" borderRadius="12px" />
@@ -489,16 +495,17 @@
             <p-skeleton height="1rem" borderRadius="12px" />
             <p-skeleton height="1rem" borderRadius="12px" />
           </div>
-        } @else {
+        }
+        @if (state.annotation) {
           <p-floatlabel variant="on" class="prime-field full-width textarea-field">
             <textarea
               pTextarea
               id="annotation"
               name="annotation"
+              class="full-width custom-textarea-scroll"
               [(ngModel)]="state.annotation"
               [disabled]="!state.editMode"
               rows="6"
-              class="full-width"
               placeholder="Аннотация доступна после перевода"
               style="resize: none"
             ></textarea>

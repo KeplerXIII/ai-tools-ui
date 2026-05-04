@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export interface ImageInfo {
   url: string;
@@ -62,9 +63,152 @@ export class ArticleParserApi {
     });
   }
 
+  translateToRussianStream(text: string): Observable<string> {
+    return new Observable<string>((observer) => {
+      const controller = new AbortController();
+
+      fetch('/api/v1/translate/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+        },
+        body: JSON.stringify({
+          text,
+          target_lang: 'ru',
+        }),
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok || !response.body) {
+            throw new Error('Ошибка потокового перевода');
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let buffer = '';
+
+          while (true) {
+            const { value, done } = await reader.read();
+
+            if (done) {
+              observer.complete();
+              break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const events = buffer.split('\n\n');
+            buffer = events.pop() || '';
+
+            for (const event of events) {
+              const lines = event.split('\n');
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6);
+
+                  if (data === '[DONE]') {
+                    observer.complete();
+                    return;
+                  }
+
+                  observer.next(data);
+                }
+
+                if (line.startsWith('event: error')) {
+                  observer.error(new Error('Ошибка потокового перевода'));
+                  return;
+                }
+              }
+            }
+          }
+        })
+        .catch((error) => {
+          if (error.name !== 'AbortError') {
+            observer.error(error);
+          }
+        });
+
+      return () => {
+        controller.abort();
+      };
+    });
+  }
+
   summarize(text: string) {
     return this.http.post<SummaryResponse>('/api/v1/extract/summary', {
       text,
+    });
+  }
+
+  summarizeStream(text: string): Observable<string> {
+    return new Observable<string>((observer) => {
+      const controller = new AbortController();
+
+      fetch('/api/v1/extract/summary/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+        },
+        body: JSON.stringify({ text }),
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok || !response.body) {
+            throw new Error('Ошибка потокового формирования аннотации');
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let buffer = '';
+
+          while (true) {
+            const { value, done } = await reader.read();
+
+            if (done) {
+              observer.complete();
+              break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const events = buffer.split('\n\n');
+            buffer = events.pop() || '';
+
+            for (const event of events) {
+              const lines = event.split('\n');
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6);
+
+                  if (data === '[DONE]') {
+                    observer.complete();
+                    return;
+                  }
+
+                  observer.next(data);
+                }
+
+                if (line.startsWith('event: error')) {
+                  observer.error(new Error('Ошибка потокового формирования аннотации'));
+                  return;
+                }
+              }
+            }
+          }
+        })
+        .catch((error) => {
+          if (error.name !== 'AbortError') {
+            observer.error(error);
+          }
+        });
+
+      return () => {
+        controller.abort();
+      };
     });
   }
 

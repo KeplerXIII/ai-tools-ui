@@ -28,3 +28,7 @@ body {
   margin: 0;
   height: 100%;
 }
+
+.p-progress-spinner circle {
+  stroke: var(--primary-text-color-light);
+}

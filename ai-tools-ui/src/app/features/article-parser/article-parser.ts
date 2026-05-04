@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
@@ -65,6 +65,7 @@ export class ArticleParser {
   constructor(
     private api: ArticleParserApi,
     public state: ArticleParserState,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   // =========================
@@ -141,13 +142,16 @@ export class ArticleParser {
       });
     });
 
-    this.api.translateToRussian(this.state.article.text).subscribe({
-      next: (response) => {
-        this.state.translatedText = response.translation;
-        this.loadingTranslation = false;
+    this.api.translateToRussianStream(this.state.article.text).subscribe({
+      next: (chunk) => {
+        this.state.translatedText += chunk;
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.translationError = 'Ошибка при переводе статьи';
+        this.translationError = 'Ошибка при потоковом переводе статьи';
+        this.loadingTranslation = false;
+      },
+      complete: () => {
         this.loadingTranslation = false;
       },
     });
@@ -167,18 +171,22 @@ export class ArticleParser {
       });
     });
 
-    this.api.summarize(this.state.translatedText).subscribe({
-      next: (response) => {
-        this.state.annotation = response.annotation;
-        this.loadingSummary = false;
+    this.api.summarizeStream(this.state.translatedText).subscribe({
+      next: (chunk) => {
+        this.state.annotation += chunk;
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.state.error = 'Ошибка при формировании аннотации';
+        this.state.error = 'Ошибка при потоковом формировании аннотации';
         this.loadingSummary = false;
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        this.loadingSummary = false;
+        this.cdr.detectChanges();
       },
     });
   }
-
   clear(): void {
     this.state.clear();
     this.entitiesError = '';
@@ -323,6 +331,15 @@ export class ArticleParser {
     textarea.style.height = `${textarea.scrollHeight}px`;
   }
 
+  private escapeHtml(value: string): string {
+    return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
   get mainImageUrl(): string {
     return this.state.article?.main_image?.trim() || '';
   }
@@ -354,5 +371,48 @@ export class ArticleParser {
       this.state.originalTags.length > 0 ||
       this.state.translatedTags.length > 0
     );
+  }
+
+  get isLoading(): boolean {
+    return (
+      this.loadingArticle ||
+      this.loadingEntities ||
+      this.loadingTranslation ||
+      this.loadingSummary ||
+      this.loadingOriginalTags ||
+      this.loadingTranslatedTags
+    );
+  }
+
+  get isDisabled(): boolean {
+    return this.isLoading || this.state.editMode;
+  }
+
+  get highlightedArticleText(): string {
+    const text = this.state.article?.text || '';
+
+    const entities = [
+      ...(this.state.entities?.military_equipment || []),
+      ...(this.state.entities?.manufacturers || []),
+      ...(this.state.entities?.contracts || []),
+    ];
+
+    if (!entities.length) {
+      return this.escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    let result = this.escapeHtml(text);
+
+    entities
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length)
+      .forEach((entity) => {
+        const escapedEntity = this.escapeHtml(entity);
+        result = result
+          .split(escapedEntity)
+          .join(`<span class="highlighted-entity">${escapedEntity}</span>`);
+      });
+
+    return result.replace(/\n/g, '<br>');
   }
 }
