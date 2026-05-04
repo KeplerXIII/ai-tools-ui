@@ -1,7 +1,74 @@
+:host ::ng-deep .textarea-field.p-floatlabel label {
+  left: 8px !important;
+  inset-inline-start: 8px !important;
+  top: 0 !important;
+  transform: translateY(-50%) !important;
+  transition: none !important;
+  background: #ffffff;
+  padding: 0 4px;
+  font-size: 15px !important;
+}
+
+:host ::ng-deep .textarea-field textarea,
+:host ::ng-deep .textarea-field .p-textarea,
+:host ::ng-deep .textarea-field .p-inputtextarea {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 17px !important;
+  background: none !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  color: var(--primary-text-color) !important;
+}
+
+:host ::ng-deep .textarea-field textarea:focus,
+:host ::ng-deep .textarea-field .p-textarea:focus,
+:host ::ng-deep .textarea-field .p-inputtextarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #cbd5e1 !important;
+}
+
+:host ::ng-deep .textarea-field textarea:disabled {
+  opacity: 0.8 !important;
+  background: none !important;
+  color: var(--primary-text-color) !important;
+  border: 1px solid transparent !important;
+}
+
+:host ::ng-deep .chip-item {
+  background-color: var(--default-chips-color);
+  color: var(--dark-text-color);
+  border-radius: 12px !important;
+  font-size: 12px !important;
+}
+
+.translater_title {
+  margin: 0;
+  color: var(--primary-text-color);
+}
+
+.detected-language, .target-language {
+  color: var(--primary-text-color-light);
+  font-size: var(--font-size-prewiew);
+  font-weight: var(--font-weight-regular);
+}
+
+.translater_header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.translater_subtitle {
+  font-weight: var(--font-weight-light);
+  color: var(--grey-text-color);
+}
+
 .tool-card {
   max-width: 1400px;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  font-family: var(--font-family-base);
 }
 
 .translate-grid {
@@ -12,11 +79,11 @@
 
 .panel-title {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
-  margin: 16px 0 8px;
   font-weight: 600;
   color: #1e293b;
+  padding-bottom: 5px;
 }
 
 .lang-badge {

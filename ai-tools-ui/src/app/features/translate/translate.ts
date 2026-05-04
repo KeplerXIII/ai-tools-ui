@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { TextareaModule } from 'primeng/textarea';
+import { ChipModule } from 'primeng/chip';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,6 +20,9 @@ import { TranslateApi } from './translate-api';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    FloatLabelModule,
+    TextareaModule,
+    ChipModule,
   ],
   templateUrl: './translate.html',
   styleUrl: './translate.scss',
