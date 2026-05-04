@@ -41,6 +41,7 @@ import { ArticleParserUrlFormComponent } from './article-parser-url-form/article
 export class ArticleParser {
   @ViewChild('translationSkeleton') translationSkeleton?: ElementRef;
   @ViewChild('annotationSkeleton') annotationSkeleton?: ElementRef;
+  @ViewChild('entitiesBlock') entitiesBlock?: ElementRef;
   readonly ButtonVariant = ButtonVariant;
   loadingArticle = false;
   loadingEntities = false;
@@ -137,12 +138,7 @@ export class ArticleParser {
     this.state.translatedTags = [];
     this.state.translatedTagsText = '';
 
-    setTimeout(() => {
-      this.translationSkeleton?.nativeElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    });
+    this.scrollToElement(() => this.translationSkeleton);
 
     this.api.translateToRussianStream(this.state.article.text).subscribe({
       next: (chunk) => {
@@ -166,12 +162,7 @@ export class ArticleParser {
     this.summaryError = '';
     this.state.annotation = '';
 
-    setTimeout(() => {
-      this.annotationSkeleton?.nativeElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    });
+    this.scrollToElement(() => this.annotationSkeleton);
 
     this.api.summarizeStream(this.state.translatedText).subscribe({
       next: (chunk) => {
@@ -215,6 +206,8 @@ export class ArticleParser {
         this.state.originalTags = res.tags;
         this.syncTagsToText();
         this.loadingOriginalTags = false;
+        this.cdr.detectChanges();
+        this.scrollToElement(() => this.entitiesBlock);
       },
       error: () => {
         this.originalTagsError = 'Ошибка тегирования оригинала';
@@ -234,6 +227,8 @@ export class ArticleParser {
         this.state.translatedTags = res.tags;
         this.syncTagsToText();
         this.loadingTranslatedTags = false;
+        this.cdr.detectChanges();
+        this.scrollToElement(() => this.entitiesBlock);
       },
       error: () => {
         this.translatedTagsError = 'Ошибка при тегировании перевода';
@@ -432,5 +427,16 @@ export class ArticleParser {
     const flexible = escaped.replace(/\\ /g, '\\s+').replace(/-/g, '[-–—-]?');
 
     return new RegExp(flexible, 'gi');
+  }
+
+  private scrollToElement(getElement: () => ElementRef | undefined): void {
+    setTimeout(() => {
+      this.cdr.detectChanges();
+
+      getElement()?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 0);
   }
 }
