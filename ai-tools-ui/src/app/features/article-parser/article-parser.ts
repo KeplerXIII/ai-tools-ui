@@ -52,6 +52,8 @@ export class ArticleParser {
   articleError = '';
   originalTagsError = '';
   translationError = '';
+  translatedTagsError = '';
+  summaryError = '';
   imagePreview: string | null = null;
 
   openImage(url: string) {
@@ -161,7 +163,7 @@ export class ArticleParser {
     if (!this.state.translatedText.trim()) return;
 
     this.loadingSummary = true;
-    this.state.error = '';
+    this.summaryError = '';
     this.state.annotation = '';
 
     setTimeout(() => {
@@ -177,7 +179,7 @@ export class ArticleParser {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.state.error = 'Ошибка при потоковом формировании аннотации';
+        this.summaryError = 'Ошибка при потоковом формировании аннотации';
         this.loadingSummary = false;
         this.cdr.detectChanges();
       },
@@ -194,6 +196,8 @@ export class ArticleParser {
     this.originalTagsError = '';
     this.translationError = '';
     this.translationError = '';
+    this.translatedTagsError = '';
+    this.summaryError = '';
   }
 
   // =========================
@@ -223,7 +227,7 @@ export class ArticleParser {
     if (!this.state.translatedText.trim()) return;
 
     this.loadingTranslatedTags = true;
-    this.state.error = '';
+    this.translatedTagsError = '';
 
     this.api.tagText(this.state.translatedText).subscribe({
       next: (res) => {
@@ -232,7 +236,7 @@ export class ArticleParser {
         this.loadingTranslatedTags = false;
       },
       error: () => {
-        this.state.error = 'Ошибка при тегировании перевода';
+        this.translatedTagsError = 'Ошибка при тегировании перевода';
         this.loadingTranslatedTags = false;
       },
     });
@@ -395,7 +399,9 @@ export class ArticleParser {
       ...(this.state.entities?.military_equipment || []),
       ...(this.state.entities?.manufacturers || []),
       ...(this.state.entities?.contracts || []),
-    ];
+    ]
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length);
 
     if (!entities.length) {
       return this.escapeHtml(text).replace(/\n/g, '<br>');
@@ -403,16 +409,28 @@ export class ArticleParser {
 
     let result = this.escapeHtml(text);
 
-    entities
-      .filter(Boolean)
-      .sort((a, b) => b.length - a.length)
-      .forEach((entity) => {
-        const escapedEntity = this.escapeHtml(entity);
-        result = result
-          .split(escapedEntity)
-          .join(`<span class="highlighted-entity">${escapedEntity}</span>`);
+    entities.forEach((entity) => {
+      const escapedEntity = this.escapeHtml(entity.trim());
+
+      const pattern = this.createFlexibleEntityPattern(escapedEntity);
+
+      result = result.replace(pattern, (match) => {
+        if (match.includes('highlighted-entity')) {
+          return match;
+        }
+
+        return `<span class="highlighted-entity">${match}</span>`;
       });
+    });
 
     return result.replace(/\n/g, '<br>');
+  }
+
+  private createFlexibleEntityPattern(value: string): RegExp {
+    const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const flexible = escaped.replace(/\\ /g, '\\s+').replace(/-/g, '[-–—-]?');
+
+    return new RegExp(flexible, 'gi');
   }
 }

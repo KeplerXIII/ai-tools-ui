@@ -223,7 +223,11 @@
               [preview]="true"
               width="500"
               (onImageError)="onImageError($event)"
-            />
+            >
+              <ng-template pTemplate="indicator">
+                <i class="pi pi-search-plus image-preview-icon"></i>
+              </ng-template>
+            </p-image>
           </div>
         }
       </section>
@@ -434,21 +438,33 @@
           <h3 class="panel-title">Текст на русском языке</h3>
 
           <div class="title-actions">
-            <app-outline-button
-              text="Тегировать перевод"
-              size="large"
-              [variant]="ButtonVariant.Rounded"
-              [disabled]="isDisabled"
-              (clicked)="tagTranslated()"
-            />
+            <div class="teg-btn-wrapper">
+              <app-outline-button
+                text="Тегировать перевод"
+                size="large"
+                [variant]="ButtonVariant.Rounded"
+                [disabled]="isDisabled"
+                (clicked)="tagTranslated()"
+              />
 
-            <app-outline-button
-              text="Сформировать аннотацию"
-              size="large"
-              [variant]="ButtonVariant.Rounded"
-              [disabled]="isDisabled || !state.translatedText.trim()"
-              (clicked)="summarizeArticle()"
-            />
+              @if (translatedTagsError) {
+                <div class="field-error">{{ translatedTagsError }}</div>
+              }
+            </div>
+
+            <div class="summary-btn-wrapper">
+              <app-outline-button
+                text="Сформировать аннотацию"
+                size="large"
+                [variant]="ButtonVariant.Rounded"
+                [disabled]="isDisabled || !state.translatedText.trim()"
+                (clicked)="summarizeArticle()"
+              />
+
+              @if (summaryError) {
+                <div class="field-error">{{ summaryError }}</div>
+              }
+            </div>
           </div>
         </div>
 

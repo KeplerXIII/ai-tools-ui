@@ -475,3 +475,16 @@
 .p-chip-remove-icon {
   color: var(--dark-text-color) !important;
 }
+
+.p-skeleton {
+  background: #d6d6d6 !important;
+}
+
+.p-skeleton::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  ) !important;
+}
