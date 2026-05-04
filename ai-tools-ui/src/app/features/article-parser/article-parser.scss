@@ -398,3 +398,17 @@
   flex-direction: column;
   gap: 10px;
 }
+
+.loading-original-tag-wrapper-btn {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.empty-entities-message {
+  margin-top: 10px;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--light-grey-text-color);
+  text-transform: uppercase;
+}

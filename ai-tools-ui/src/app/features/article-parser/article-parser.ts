@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
@@ -39,6 +39,8 @@ import { ArticleParserUrlFormComponent } from './article-parser-url-form/article
   styleUrl: './article-parser.scss',
 })
 export class ArticleParser {
+  @ViewChild('translationSkeleton') translationSkeleton?: ElementRef;
+  @ViewChild('annotationSkeleton') annotationSkeleton?: ElementRef;
   readonly ButtonVariant = ButtonVariant;
   loadingArticle = false;
   loadingEntities = false;
@@ -132,6 +134,13 @@ export class ArticleParser {
     this.state.translatedTags = [];
     this.state.translatedTagsText = '';
 
+    setTimeout(() => {
+      this.translationSkeleton?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+
     this.api.translateToRussian(this.state.article.text).subscribe({
       next: (response) => {
         this.state.translatedText = response.translation;
@@ -150,6 +159,13 @@ export class ArticleParser {
     this.loadingSummary = true;
     this.state.error = '';
     this.state.annotation = '';
+
+    setTimeout(() => {
+      this.annotationSkeleton?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
 
     this.api.summarize(this.state.translatedText).subscribe({
       next: (response) => {
@@ -319,12 +335,22 @@ export class ArticleParser {
     console.log('Ошибка загрузки картинки:', this.mainImageUrl, event);
   }
 
+  get hasEmptyEntitiesResult(): boolean {
+    return (
+      !!this.state.entities &&
+      !this.loadingEntities &&
+      !this.state.entities.military_equipment?.length &&
+      !this.state.entities.manufacturers?.length &&
+      !this.state.entities.contracts?.length
+    );
+  }
+
   get hasEntitiesBlock(): boolean {
     return (
       this.loadingEntities ||
-      !!this.state.entities?.military_equipment?.length ||
-      !!this.state.entities?.manufacturers?.length ||
-      !!this.state.entities?.contracts?.length ||
+      this.loadingOriginalTags ||
+      this.loadingTranslatedTags ||
+      !!this.state.entities ||
       this.state.originalTags.length > 0 ||
       this.state.translatedTags.length > 0
     );

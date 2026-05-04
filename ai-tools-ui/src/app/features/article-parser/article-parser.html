@@ -10,6 +10,7 @@
     (submitUrl)="extractArticle()"
     (clearClicked)="clear()"
   />
+
   @if (loadingArticle) {
     <div class="btn-wrapper">
       <p-skeleton height="2.5rem" width="12rem" borderRadius="20px" />
@@ -17,6 +18,7 @@
       <p-skeleton height="2.5rem" width="12rem" borderRadius="20px" />
     </div>
   }
+
   @if (state.article && !loadingArticle) {
     <div class="btn-wrapper">
       <app-outline-button
@@ -57,13 +59,13 @@
 
           <div class="meta-list">
             <div class="meta-block-one">
-              <p-skeleton height="1.5rem" borderRadius="12px" />
-              <p-skeleton height="1.5rem" borderRadius="12px" />
-              <p-skeleton height="1.5rem" borderRadius="12px" />
-              <p-skeleton height="1.5rem" borderRadius="12px" />
-              <p-skeleton height="1.5rem" borderRadius="12px" />
-              <p-skeleton height="1.5rem" borderRadius="12px" />
-              <p-skeleton height="1.5rem" borderRadius="12px" />
+              <p-skeleton height="1rem" borderRadius="12px" />
+              <p-skeleton height="1rem" borderRadius="12px" />
+              <p-skeleton height="1rem" borderRadius="12px" />
+              <p-skeleton height="1rem" borderRadius="12px" />
+              <p-skeleton height="1rem" borderRadius="12px" />
+              <p-skeleton height="1rem" borderRadius="12px" />
+              <p-skeleton height="1rem" borderRadius="12px" />
             </div>
           </div>
 
@@ -86,14 +88,15 @@
           <p-skeleton width="12rem" height="2.5rem" borderRadius="20px" />
         </div>
       </div>
+
       <div class="sceleton-translate-text">
-        <p-skeleton height="1.5rem" borderRadius="12px" />
-        <p-skeleton height="1.5rem" borderRadius="12px" />
-        <p-skeleton height="1.5rem" borderRadius="12px" />
-        <p-skeleton height="1.5rem" borderRadius="12px" />
-        <p-skeleton height="1.5rem" borderRadius="12px" />
-        <p-skeleton height="1.5rem" borderRadius="12px" />
-        <p-skeleton height="1.5rem" borderRadius="12px" />
+        <p-skeleton height="1rem" borderRadius="12px" />
+        <p-skeleton height="1rem" borderRadius="12px" />
+        <p-skeleton height="1rem" borderRadius="12px" />
+        <p-skeleton height="1rem" borderRadius="12px" />
+        <p-skeleton height="1rem" borderRadius="12px" />
+        <p-skeleton height="1rem" borderRadius="12px" />
+        <p-skeleton height="1rem" borderRadius="12px" />
       </div>
     </section>
   }
@@ -104,6 +107,7 @@
         <div class="meta-wrapper">
           <div class="title-wrapper">
             <h3 class="panel-title">Метаданные</h3>
+
             <div class="chips-wrapper">
               @if (state.article.length) {
                 <p-chip label="Длина: {{ state.article.length }}" class="chip-item" />
@@ -123,6 +127,7 @@
               }
             </div>
           </div>
+
           <div class="meta-list">
             <div class="meta-block-one">
               <p-floatlabel variant="on" class="prime-field full-width">
@@ -194,6 +199,7 @@
               </p-floatlabel>
             </div>
           </div>
+
           <app-outline-button
             text="Извлечь сущности"
             size="large"
@@ -201,10 +207,12 @@
             [disabled]="loadingEntities"
             (clicked)="requestEntities()"
           />
+
           @if (entitiesError) {
             <div class="field-error">{{ entitiesError }}</div>
           }
         </div>
+
         @if (mainImageUrl) {
           <div class="prew-image-block">
             <p class="image-prew-title">Предпросмотр изображения:</p>
@@ -218,6 +226,7 @@
           </div>
         }
       </section>
+
       @if (hasEntitiesBlock) {
         <section class="panel">
           <div class="title-wrapper">
@@ -226,13 +235,19 @@
 
           @if (loadingEntities) {
             <div class="entities-sceleton-wrapper">
-              <p-skeleton width="10rem" height="1rem" />
-              <p-skeleton width="85rem" height="1rem" />
-              <p-skeleton width="85rem" height="1rem" />
-              <p-skeleton width="85rem" height="1rem" />
-              <p-skeleton width="85rem" height="1rem" />
-              <p-skeleton width="85rem" height="1rem" />
+              <p-skeleton width="10rem" height="1rem" borderRadius="12px" />
+              <p-skeleton width="85rem" height="1rem" borderRadius="12px" />
+              <p-skeleton width="85rem" height="1rem" borderRadius="12px" />
+              <p-skeleton width="85rem" height="1rem" borderRadius="12px" />
+              <p-skeleton width="85rem" height="1rem" borderRadius="12px" />
+              <p-skeleton width="85rem" height="1rem" borderRadius="12px" />
             </div>
+          }
+
+          @if (hasEmptyEntitiesResult) {
+            <p class="empty-entities-message">
+              В данном документе не было обнаружено сущностей.
+            </p>
           }
 
           @if (state.entities?.military_equipment?.length) {
@@ -291,9 +306,26 @@
               </p-floatlabel>
             </div>
           }
+
+          @if (loadingOriginalTags) {
+            <p-skeleton width="8rem" height="1rem" borderRadius="12px" />
+
+            <div class="loading-original-tag-wrapper-btn">
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+            </div>
+          }
+
           @if (state.originalTags.length) {
             <div class="meta-tags">
-              <h4 class="">Теги (оригинал):</h4>
+              <h4>Теги (оригинал):</h4>
+
               <div class="tags original">
                 @for (tag of state.originalTags; track tag) {
                   <p-chip
@@ -307,9 +339,25 @@
             </div>
           }
 
+          @if (loadingTranslatedTags) {
+            <p-skeleton width="8rem" height="1rem" borderRadius="12px" style="margin-top: 10px" />
+
+            <div class="loading-original-tag-wrapper-btn">
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+              <p-skeleton height="2rem" width="7rem" borderRadius="20px" />
+            </div>
+          }
+
           @if (state.translatedTags.length) {
             <div class="meta-tags">
               <b>Теги (русский):</b>
+
               <div class="tags translated">
                 @for (tag of state.translatedTags; track tag) {
                   <p-chip
@@ -329,6 +377,7 @@
     <section class="panel full">
       <div class="title-wrapper">
         <h3 class="panel-title">Исходный текст</h3>
+
         <div class="translate-teg-btn">
           <div class="translate-btn-wrapper">
             <app-outline-button
@@ -338,6 +387,7 @@
               [disabled]="loadingTranslation"
               (clicked)="translateArticle()"
             />
+
             @if (translationError) {
               <div class="field-error">{{ translationError }}</div>
             }
@@ -351,16 +401,13 @@
               [disabled]="loadingOriginalTags"
               (clicked)="tagOriginal()"
             />
+
             @if (originalTagsError) {
               <div class="field-error">{{ originalTagsError }}</div>
             }
           </div>
         </div>
       </div>
-
-      @if (loadingOriginalTags) {
-        <mat-spinner diameter="24"></mat-spinner>
-      }
 
       <p-floatlabel variant="on" class="prime-field full-width textarea-field">
         <textarea
@@ -374,17 +421,9 @@
           style="resize: none"
         ></textarea>
       </p-floatlabel>
-
-      @if (state.originalTags.length) {
-        <div class="tags original">
-          @for (tag of state.originalTags; track tag) {
-            <span class="tag">{{ tag }}</span>
-          }
-        </div>
-      }
     </section>
 
-    @if (state.translatedText.trim()) {
+    @if (state.translatedText.trim() || loadingTranslation) {
       <section class="panel full">
         <div class="title-wrapper">
           <h3 class="panel-title">Текст на русском языке</h3>
@@ -394,62 +433,77 @@
               text="Тегировать перевод"
               size="large"
               [variant]="ButtonVariant.Rounded"
-              [disabled]="loadingTranslatedTags"
+              [disabled]="loadingTranslatedTags || loadingTranslation"
               (clicked)="tagTranslated()"
             />
+
             <app-outline-button
               text="Сформировать аннотацию"
               size="large"
               [variant]="ButtonVariant.Rounded"
-              [disabled]="loadingSummary || !state.translatedText.trim()"
+              [disabled]="loadingSummary || loadingTranslation || !state.translatedText.trim()"
               (clicked)="summarizeArticle()"
             />
           </div>
         </div>
 
-        @if (loadingTranslatedTags) {
-          <mat-spinner diameter="24"></mat-spinner>
+        @if (loadingTranslation) {
+          <div #translationSkeleton class="sceleton-translate-text">
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+          </div>
+        } @else {
+          <p-floatlabel variant="on" class="prime-field full-width textarea-field">
+            <textarea
+              pTextarea
+              id="translated_text"
+              name="translated_text"
+              [(ngModel)]="state.translatedText"
+              [disabled]="!state.editMode"
+              rows="8"
+              class="full-width"
+              placeholder="Здесь появится перевод"
+              style="resize: none"
+            ></textarea>
+          </p-floatlabel>
         }
-
-        <p-floatlabel variant="on" class="prime-field full-width textarea-field">
-          <textarea
-            pTextarea
-            id="translated_text"
-            name="translated_text"
-            [(ngModel)]="state.translatedText"
-            [disabled]="!state.editMode"
-            rows="8"
-            class="full-width"
-            placeholder="Здесь появится перевод"
-            style="resize: none"
-          ></textarea>
-        </p-floatlabel>
       </section>
     }
 
-    @if (state.annotation.trim()) {
+    @if (state.annotation.trim() || loadingSummary) {
       <section class="panel full">
         <div class="title-wrapper">
           <h3 class="panel-title">Аннотация</h3>
         </div>
 
         @if (loadingSummary) {
-          <mat-spinner diameter="28"></mat-spinner>
+          <div #annotationSkeleton class="sceleton-translate-text">
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+            <p-skeleton height="1rem" borderRadius="12px" />
+          </div>
+        } @else {
+          <p-floatlabel variant="on" class="prime-field full-width textarea-field">
+            <textarea
+              pTextarea
+              id="annotation"
+              name="annotation"
+              [(ngModel)]="state.annotation"
+              [disabled]="!state.editMode"
+              rows="6"
+              class="full-width"
+              placeholder="Аннотация доступна после перевода"
+              style="resize: none"
+            ></textarea>
+          </p-floatlabel>
         }
-
-        <p-floatlabel variant="on" class="prime-field full-width textarea-field">
-          <textarea
-            pTextarea
-            id="annotation"
-            name="annotation"
-            [(ngModel)]="state.annotation"
-            [disabled]="!state.editMode"
-            rows="6"
-            class="full-width"
-            placeholder="Аннотация доступна после перевода"
-            style="resize: none"
-          ></textarea>
-        </p-floatlabel>
       </section>
     }
   }
