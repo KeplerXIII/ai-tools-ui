@@ -1,15 +1,22 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { SkeletonModule } from 'primeng/skeleton';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
+import { ChipModule } from 'primeng/chip';
+import { ImageModule } from 'primeng/image';
 import { ArticleParserApi } from './article-parser-api';
 import { ArticleParserState } from './article-parser-state';
+import {
+  ButtonVariant,
+  OutlineButtonComponent,
+} from '../../shared/ui/outline-button/outline-button.component';
+import { ArticleParserUrlFormComponent } from './article-parser-url-form/article-parser-url-form';
 
 @Component({
   selector: 'app-article-parser',
@@ -20,18 +27,34 @@ import { ArticleParserState } from './article-parser-state';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    FloatLabelModule,
+    InputTextModule,
+    OutlineButtonComponent,
+    ArticleParserUrlFormComponent,
+    ChipModule,
+    ImageModule,
+    SkeletonModule,
   ],
   templateUrl: './article-parser.html',
   styleUrl: './article-parser.scss',
 })
 export class ArticleParser {
+  @ViewChild('translationSkeleton') translationSkeleton?: ElementRef;
+  @ViewChild('annotationSkeleton') annotationSkeleton?: ElementRef;
+  @ViewChild('entitiesBlock') entitiesBlock?: ElementRef;
+  readonly ButtonVariant = ButtonVariant;
   loadingArticle = false;
   loadingEntities = false;
   loadingTranslation = false;
   loadingSummary = false;
   loadingOriginalTags = false;
   loadingTranslatedTags = false;
-
+  entitiesError = '';
+  articleError = '';
+  originalTagsError = '';
+  translationError = '';
+  translatedTagsError = '';
+  summaryError = '';
   imagePreview: string | null = null;
 
   private buffer = '';
@@ -39,8 +62,7 @@ export class ArticleParser {
   constructor(
     private api: ArticleParserApi,
     public state: ArticleParserState,
-    private sanitizer: DomSanitizer,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   openImage(url: string): void {
@@ -59,7 +81,11 @@ export class ArticleParser {
     const value = this.state.url.trim();
     if (!value) return;
 
+    this.articleError = '';
     this.state.error = '';
+    this.entitiesError = '';
+    this.originalTagsError = '';
+    this.translationError = '';
     this.state.article = null;
     this.state.entities = null;
     this.state.translatedText = '';
@@ -78,7 +104,7 @@ export class ArticleParser {
         this.loadingArticle = false;
       },
       error: () => {
-        this.state.error = 'Ошибка при извлечении статьи';
+        this.articleError = 'Ошибка при извлечении статьи';
         this.loadingArticle = false;
       },
     });
@@ -88,7 +114,7 @@ export class ArticleParser {
     if (!this.state.article?.text) return;
 
     this.loadingEntities = true;
-    this.state.error = '';
+    this.entitiesError = '';
     this.state.entities = null;
 
     this.api.extractEntities(this.state.article.text).subscribe({
@@ -97,7 +123,7 @@ export class ArticleParser {
         this.loadingEntities = false;
       },
       error: () => {
-        this.state.error = 'Ошибка при извлечении сущностей';
+        this.entitiesError = 'Ошибка при извлечении сущностей';
         this.loadingEntities = false;
       },
     });
@@ -107,66 +133,65 @@ export class ArticleParser {
     if (!this.state.article?.text) return;
 
     this.loadingTranslation = true;
+    this.translationError = '';
     this.state.error = '';
     this.state.translatedText = '';
     this.state.annotation = '';
     this.state.translatedTags = [];
     this.state.translatedTagsText = '';
 
-    try {
-      const response = await this.api.translateToRussianStream(
-        this.state.article.text,
-        (chunk) => {
-          this.state.translatedText += chunk;
-          this.cdr.detectChanges();
-        }
-      );
+    this.scrollToElement(() => this.translationSkeleton);
 
-      this.state.translatedText = response.translation;
-    } catch (error) {
-      console.error(error);
-      this.state.error = 'Ошибка при переводе статьи';
-    } finally {
-      this.loadingTranslation = false;
-      this.cdr.detectChanges();
-    }
+    this.api.translateToRussianStream(this.state.article.text).subscribe({
+      next: (chunk) => {
+        this.state.translatedText += chunk;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.translationError = 'Ошибка при потоковом переводе статьи';
+        this.loadingTranslation = false;
+      },
+      complete: () => {
+        this.loadingTranslation = false;
+      },
+    });
   }
 
   async summarizeArticle(): Promise<void> {
     if (!this.state.translatedText.trim()) return;
 
     this.loadingSummary = true;
-    this.state.error = '';
+    this.summaryError = '';
     this.state.annotation = '';
     this.buffer = '';
 
-    try {
-      const result = await this.api.summarizeStream(
-        this.state.translatedText,
-        (chunk) => {
-          this.buffer += chunk;
+    this.scrollToElement(() => this.annotationSkeleton);
 
-          requestAnimationFrame(() => {
-            this.state.annotation += this.buffer;
-            this.buffer = '';
-            this.cdr.detectChanges();
-          });
-        }
-      );
-
-      this.state.annotation = result;
-    } catch (error) {
-      console.error(error);
-      this.state.error = 'Ошибка при формировании аннотации';
-    } finally {
-      this.loadingSummary = false;
-      this.cdr.detectChanges();
-    }
+    this.api.summarizeStream(this.state.translatedText).subscribe({
+      next: (chunk) => {
+        this.state.annotation += chunk;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.summaryError = 'Ошибка при потоковом формировании аннотации';
+        this.loadingSummary = false;
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        this.loadingSummary = false;
+        this.cdr.detectChanges();
+      },
+    });
   }
-
   clear(): void {
     this.state.clear();
-    this.imagePreview = null;
+    this.entitiesError = '';
+    this.articleError = '';
+    this.originalTagsError = '';
+    this.translationError = '';
+    this.translationError = '';
+    this.translatedTagsError = '';
+    this.summaryError = '';
   }
 
   // =========================
@@ -177,16 +202,18 @@ export class ArticleParser {
     if (!this.state.article?.text) return;
 
     this.loadingOriginalTags = true;
-    this.state.error = '';
+    this.originalTagsError = '';
 
     this.api.tagText(this.state.article.text).subscribe({
       next: (res) => {
         this.state.originalTags = res.tags;
         this.syncTagsToText();
         this.loadingOriginalTags = false;
+        this.cdr.detectChanges();
+        this.scrollToElement(() => this.entitiesBlock);
       },
       error: () => {
-        this.state.error = 'Ошибка при тегировании оригинала';
+        this.originalTagsError = 'Ошибка тегирования оригинала';
         this.loadingOriginalTags = false;
       },
     });
@@ -196,16 +223,18 @@ export class ArticleParser {
     if (!this.state.translatedText.trim()) return;
 
     this.loadingTranslatedTags = true;
-    this.state.error = '';
+    this.translatedTagsError = '';
 
     this.api.tagText(this.state.translatedText).subscribe({
       next: (res) => {
         this.state.translatedTags = res.tags;
         this.syncTagsToText();
         this.loadingTranslatedTags = false;
+        this.cdr.detectChanges();
+        this.scrollToElement(() => this.entitiesBlock);
       },
       error: () => {
-        this.state.error = 'Ошибка при тегировании перевода';
+        this.translatedTagsError = 'Ошибка при тегировании перевода';
         this.loadingTranslatedTags = false;
       },
     });
@@ -214,59 +243,6 @@ export class ArticleParser {
   // =========================
   // ПОДСВЕТКА СУЩНОСТЕЙ
   // =========================
-
-  getHighlightedArticleText(): SafeHtml {
-    const text = this.state.article?.text || '';
-
-    if (!this.state.entities) {
-      return this.sanitizer.bypassSecurityTrustHtml(
-        this.escapeHtml(text).replace(/\n/g, '<br>')
-      );
-    }
-
-    let html = this.escapeHtml(text);
-
-    const replacements: { value: string; className: string }[] = [
-      ...this.state.entities.military_equipment.map((x) => ({
-        value: x,
-        className: 'entity-equipment',
-      })),
-      ...this.state.entities.manufacturers.map((x) => ({
-        value: x,
-        className: 'entity-manufacturer',
-      })),
-      ...this.state.entities.contracts.map((x) => ({
-        value: x,
-        className: 'entity-contract',
-      })),
-    ];
-
-    replacements
-      .filter((x) => x.value && x.value.trim())
-      .sort((a, b) => b.value.length - a.value.length)
-      .forEach((item) => {
-        const escapedValue = this.escapeRegExp(this.escapeHtml(item.value.trim()));
-        const regex = new RegExp(escapedValue, 'gi');
-
-        html = html.replace(
-          regex,
-          (match) => `<span class="${item.className}">${match}</span>`
-        );
-      });
-
-    html = html.replace(/\n/g, '<br>');
-
-    return this.sanitizer.bypassSecurityTrustHtml(html);
-  }
-
-  private escapeHtml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
 
   private escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -310,7 +286,7 @@ export class ArticleParser {
 
   updateEntityList(
     field: 'military_equipment' | 'manufacturers' | 'contracts',
-    value: string
+    value: string,
   ): void {
     if (!this.state.entities) {
       this.state.entities = {
@@ -346,5 +322,132 @@ export class ArticleParser {
       tags: this.state.translatedTags,
       annotation: this.state.annotation,
     });
+  }
+
+  removeOriginalTag(tag: string): void {
+    this.state.originalTags = this.state.originalTags.filter((item) => item !== tag);
+    this.syncTagsToText();
+  }
+
+  removeTranslatedTag(tag: string): void {
+    this.state.translatedTags = this.state.translatedTags.filter((item) => item !== tag);
+    this.syncTagsToText();
+  }
+
+  autoResize(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }
+
+  private escapeHtml(value: string): string {
+    return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+  get mainImageUrl(): string {
+    return this.state.article?.main_image?.trim() || '';
+  }
+
+  onImageLoad(): void {
+    console.log('Картинка загрузилась:', this.mainImageUrl);
+  }
+
+  onImageError(event: Event): void {
+    console.log('Ошибка загрузки картинки:', this.mainImageUrl, event);
+  }
+
+  get hasEmptyEntitiesResult(): boolean {
+    return (
+      !!this.state.entities &&
+      !this.loadingEntities &&
+      !this.state.entities.military_equipment?.length &&
+      !this.state.entities.manufacturers?.length &&
+      !this.state.entities.contracts?.length
+    );
+  }
+
+  get hasEntitiesBlock(): boolean {
+    return (
+      this.loadingEntities ||
+      this.loadingOriginalTags ||
+      this.loadingTranslatedTags ||
+      !!this.state.entities ||
+      this.state.originalTags.length > 0 ||
+      this.state.translatedTags.length > 0
+    );
+  }
+
+  get isLoading(): boolean {
+    return (
+      this.loadingArticle ||
+      this.loadingEntities ||
+      this.loadingTranslation ||
+      this.loadingSummary ||
+      this.loadingOriginalTags ||
+      this.loadingTranslatedTags
+    );
+  }
+
+  get isDisabled(): boolean {
+    return this.isLoading || this.state.editMode;
+  }
+
+  get highlightedArticleText(): string {
+    const text = this.state.article?.text || '';
+
+    const entities = [
+      ...(this.state.entities?.military_equipment || []),
+      ...(this.state.entities?.manufacturers || []),
+      ...(this.state.entities?.contracts || []),
+    ]
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length);
+
+    if (!entities.length) {
+      return this.escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    let result = this.escapeHtml(text);
+
+    entities.forEach((entity) => {
+      const escapedEntity = this.escapeHtml(entity.trim());
+
+      const pattern = this.createFlexibleEntityPattern(escapedEntity);
+
+      result = result.replace(pattern, (match) => {
+        if (match.includes('highlighted-entity')) {
+          return match;
+        }
+
+        return `<span class="highlighted-entity">${match}</span>`;
+      });
+    });
+
+    return result.replace(/\n/g, '<br>');
+  }
+
+  private createFlexibleEntityPattern(value: string): RegExp {
+    const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const flexible = escaped.replace(/\\ /g, '\\s+').replace(/-/g, '[-–—-]?');
+
+    return new RegExp(flexible, 'gi');
+  }
+
+  private scrollToElement(getElement: () => ElementRef | undefined): void {
+    setTimeout(() => {
+      this.cdr.detectChanges();
+
+      getElement()?.nativeElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 0);
   }
 }

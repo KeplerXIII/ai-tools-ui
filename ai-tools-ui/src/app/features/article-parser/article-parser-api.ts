@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export interface ImageInfo {
   url: string;
@@ -68,55 +69,77 @@ export class ArticleParserApi {
     });
   }
 
-  async translateToRussianStream(
-    text: string,
-    onChunk: (chunk: string) => void
-  ): Promise<TranslateStreamResponse> {
-    const response = await fetch('/api/v1/translate/stream', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text,
-        target_lang: 'ru',
-      }),
+  translateToRussianStream(text: string): Observable<string> {
+    return new Observable<string>((observer) => {
+      const controller = new AbortController();
+
+      fetch('/api/v1/translate/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+        },
+        body: JSON.stringify({
+          text,
+          target_lang: 'ru',
+        }),
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok || !response.body) {
+            throw new Error('Ошибка потокового перевода');
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let buffer = '';
+
+          while (true) {
+            const { value, done } = await reader.read();
+
+            if (done) {
+              observer.complete();
+              break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const events = buffer.split('\n\n');
+            buffer = events.pop() || '';
+
+            for (const event of events) {
+              const lines = event.split('\n');
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6);
+
+                  if (data === '[DONE]') {
+                    observer.complete();
+                    return;
+                  }
+
+                  observer.next(data);
+                }
+
+                if (line.startsWith('event: error')) {
+                  observer.error(new Error('Ошибка потокового перевода'));
+                  return;
+                }
+              }
+            }
+          }
+        })
+        .catch((error) => {
+          if (error.name !== 'AbortError') {
+            observer.error(error);
+          }
+        });
+
+      return () => {
+        controller.abort();
+      };
     });
-
-    if (!response.ok) {
-      throw new Error(`Ошибка перевода: ${response.status}`);
-    }
-
-    const sourceLang = response.headers.get('X-Source-Lang');
-    const targetLang = response.headers.get('X-Target-Lang');
-
-    if (!response.body) {
-      throw new Error('Пустой streaming response body');
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-
-    let translation = '';
-
-    while (true) {
-      const { value, done } = await reader.read();
-
-      if (done) {
-        break;
-      }
-
-      const chunk = decoder.decode(value, { stream: true });
-
-      translation += chunk;
-      onChunk(chunk);
-    }
-
-    return {
-      source_lang: sourceLang,
-      target_lang: targetLang,
-      translation,
-    };
   }
 
   summarize(text: string) {
@@ -125,42 +148,74 @@ export class ArticleParserApi {
     });
   }
 
-  async summarizeStream(
-    text: string,
-    onChunk: (chunk: string) => void
-  ): Promise<string> {
-    const response = await fetch('/api/v1/extract/summary/stream', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ text }),
+  summarizeStream(text: string): Observable<string> {
+    return new Observable<string>((observer) => {
+      const controller = new AbortController();
+
+      fetch('/api/v1/extract/summary/stream', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+        },
+        body: JSON.stringify({ text }),
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok || !response.body) {
+            throw new Error('Ошибка потокового формирования аннотации');
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let buffer = '';
+
+          while (true) {
+            const { value, done } = await reader.read();
+
+            if (done) {
+              observer.complete();
+              break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+
+            const events = buffer.split('\n\n');
+            buffer = events.pop() || '';
+
+            for (const event of events) {
+              const lines = event.split('\n');
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6);
+
+                  if (data === '[DONE]') {
+                    observer.complete();
+                    return;
+                  }
+
+                  observer.next(data);
+                }
+
+                if (line.startsWith('event: error')) {
+                  observer.error(new Error('Ошибка потокового формирования аннотации'));
+                  return;
+                }
+              }
+            }
+          }
+        })
+        .catch((error) => {
+          if (error.name !== 'AbortError') {
+            observer.error(error);
+          }
+        });
+
+      return () => {
+        controller.abort();
+      };
     });
-
-    if (!response.ok) {
-      throw new Error(`Ошибка аннотации: ${response.status}`);
-    }
-
-    if (!response.body) {
-      throw new Error('Пустой streaming response body');
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-
-    let result = '';
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-
-      result += chunk;
-      onChunk(chunk);
-    }
-
-    return result;
   }
 
   tagText(text: string, maxTags = 12) {

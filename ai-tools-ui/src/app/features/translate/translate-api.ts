@@ -30,7 +30,7 @@ export class TranslateApi {
 
   async translateStream(
     text: string,
-    onChunk: (chunk: string) => void
+    onChunk: (chunk: string) => void,
   ): Promise<TranslateStreamResponse> {
     const response = await fetch(`${this.apiUrl}/stream`, {
       method: 'POST',
@@ -58,6 +58,7 @@ export class TranslateApi {
     const decoder = new TextDecoder('utf-8');
 
     let translation = '';
+    let buffer = '';
 
     while (true) {
       const { value, done } = await reader.read();
@@ -66,10 +67,31 @@ export class TranslateApi {
         break;
       }
 
-      const chunk = decoder.decode(value, { stream: true });
+      buffer += decoder.decode(value, { stream: true });
 
-      translation += chunk;
-      onChunk(chunk);
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+
+        if (!trimmedLine.startsWith('data:')) {
+          continue;
+        }
+
+        const data = trimmedLine.replace(/^data:\s?/, '');
+
+        if (data === '[DONE]') {
+          return {
+            translation,
+            source_lang: sourceLang,
+            target_lang: targetLang,
+          };
+        }
+
+        translation += data;
+        onChunk(data);
+      }
     }
 
     return {
