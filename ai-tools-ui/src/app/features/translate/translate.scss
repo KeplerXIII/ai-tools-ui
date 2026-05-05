@@ -119,6 +119,11 @@
   color: #c62828;
 }
 
+.language-name {
+  font-weight: var(--font-weight-bold);
+  color: var(--grey-text-color);
+}
+
 @media (max-width: 900px) {
   .translate-grid {
     grid-template-columns: 1fr;
