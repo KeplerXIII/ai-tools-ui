@@ -34,6 +34,12 @@ export interface TranslateResponse {
   translation: string;
 }
 
+export interface TranslateStreamResponse {
+  source_lang: string | null;
+  target_lang: string | null;
+  translation: string;
+}
+
 export interface SummaryResponse {
   annotation: string;
 }

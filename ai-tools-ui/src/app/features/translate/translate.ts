@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { TextareaModule } from 'primeng/textarea';
@@ -36,9 +36,12 @@ export class Translate {
   error = '';
   copied = false;
 
-  constructor(private translateApi: TranslateApi) {}
+  constructor(
+    private translateApi: TranslateApi,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  translate(): void {
+  async translate(): Promise<void> {
     const value = this.text.trim();
 
     if (!value) {
@@ -52,18 +55,25 @@ export class Translate {
     this.targetLang = '';
     this.copied = false;
 
-    this.translateApi.translate(value).subscribe({
-      next: (response) => {
-        this.result = response.translation;
-        this.sourceLang = response.source_lang ?? '';
-        this.targetLang = response.target_lang ?? '';
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Ошибка при выполнении перевода';
-        this.loading = false;
-      },
-    });
+    try {
+      const response = await this.translateApi.translateStream(
+        value,
+        (chunk) => {
+          this.result += chunk;
+          this.cdr.detectChanges();
+        }
+      );
+
+      this.result = response.translation;
+      this.sourceLang = response.source_lang ?? '';
+      this.targetLang = response.target_lang ?? 'ru';
+    } catch (error) {
+      console.error(error);
+      this.error = 'Ошибка при выполнении перевода';
+    } finally {
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
   }
 
   clear(): void {
@@ -85,6 +95,7 @@ export class Translate {
 
     setTimeout(() => {
       this.copied = false;
+      this.cdr.detectChanges();
     }, 1500);
   }
 }

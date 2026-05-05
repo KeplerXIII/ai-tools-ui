@@ -57,19 +57,21 @@ export class ArticleParser {
   summaryError = '';
   imagePreview: string | null = null;
 
-  openImage(url: string) {
-    this.imagePreview = url;
-  }
-
-  closeImage() {
-    this.imagePreview = null;
-  }
+  private buffer = '';
 
   constructor(
     private api: ArticleParserApi,
     public state: ArticleParserState,
     private cdr: ChangeDetectorRef,
   ) {}
+
+  openImage(url: string): void {
+    this.imagePreview = url;
+  }
+
+  closeImage(): void {
+    this.imagePreview = null;
+  }
 
   // =========================
   // ОСНОВНОЕ
@@ -127,7 +129,7 @@ export class ArticleParser {
     });
   }
 
-  translateArticle(): void {
+  async translateArticle(): Promise<void> {
     if (!this.state.article?.text) return;
 
     this.loadingTranslation = true;
@@ -155,12 +157,13 @@ export class ArticleParser {
     });
   }
 
-  summarizeArticle(): void {
+  async summarizeArticle(): Promise<void> {
     if (!this.state.translatedText.trim()) return;
 
     this.loadingSummary = true;
     this.summaryError = '';
     this.state.annotation = '';
+    this.buffer = '';
 
     this.scrollToElement(() => this.annotationSkeleton);
 
@@ -235,6 +238,14 @@ export class ArticleParser {
         this.loadingTranslatedTags = false;
       },
     });
+  }
+
+  // =========================
+  // ПОДСВЕТКА СУЩНОСТЕЙ
+  // =========================
+
+  private escapeRegExp(value: string): string {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   // =========================
