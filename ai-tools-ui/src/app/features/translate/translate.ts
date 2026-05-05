@@ -8,8 +8,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
 import { TranslateApi } from './translate-api';
+import {
+  ButtonVariant,
+  OutlineButtonComponent,
+} from '../../shared/ui/outline-button/outline-button.component';
+import { PrimaryButtonComponent } from '../../shared/ui/primary-button/primary-button.component';
+import { UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-translate',
@@ -23,6 +28,9 @@ import { TranslateApi } from './translate-api';
     FloatLabelModule,
     TextareaModule,
     ChipModule,
+    OutlineButtonComponent,
+    PrimaryButtonComponent,
+    UpperCasePipe,
   ],
   templateUrl: './translate.html',
   styleUrl: './translate.scss',
@@ -36,9 +44,11 @@ export class Translate {
   error = '';
   copied = false;
 
+  readonly ButtonVariant = ButtonVariant;
+
   constructor(
     private translateApi: TranslateApi,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   async translate(): Promise<void> {
@@ -56,13 +66,10 @@ export class Translate {
     this.copied = false;
 
     try {
-      const response = await this.translateApi.translateStream(
-        value,
-        (chunk) => {
-          this.result += chunk;
-          this.cdr.detectChanges();
-        }
-      );
+      const response = await this.translateApi.translateStream(value, (chunk) => {
+        this.result += chunk;
+        this.cdr.detectChanges();
+      });
 
       this.result = response.translation;
       this.sourceLang = response.source_lang ?? '';
@@ -91,7 +98,9 @@ export class Translate {
     }
 
     await navigator.clipboard.writeText(this.result);
+
     this.copied = true;
+    this.cdr.detectChanges();
 
     setTimeout(() => {
       this.copied = false;

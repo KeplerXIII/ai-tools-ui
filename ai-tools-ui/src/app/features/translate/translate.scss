@@ -48,7 +48,8 @@
   color: var(--primary-text-color);
 }
 
-.detected-language, .target-language {
+.detected-language,
+.target-language {
   color: var(--primary-text-color-light);
   font-size: var(--font-size-prewiew);
   font-weight: var(--font-weight-regular);
@@ -84,6 +85,7 @@
   font-weight: 600;
   color: #1e293b;
   padding-bottom: 5px;
+  gap: 10px;
 }
 
 .lang-badge {
@@ -122,6 +124,8 @@
 .language-name {
   font-weight: var(--font-weight-bold);
   color: var(--grey-text-color);
+  text-transform: uppercase;
+  font-size: var(--font-size-prewiew);
 }
 
 @media (max-width: 900px) {
@@ -133,4 +137,25 @@
     flex-direction: column;
     gap: 4px;
   }
+}
+
+.copy-icon {
+  font-size: 21px;
+  cursor: pointer;
+  color: var(--primary-text-color);
+  transition: 0.2s;
+
+  &:hover {
+    color: var(--primary-text-color-light);
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: default;
+  }
+}
+
+.copy-icon.success {
+  color: var(--accent-color-success) !important;
 }
